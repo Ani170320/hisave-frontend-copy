@@ -1,0 +1,245 @@
+.lap-tab {
+    display: flex;
+}
+
+.header-section {
+    width: 100%;
+    height: 92px;
+    justify-content: space-between;
+    padding: 12px 32px;
+    background: #FFFFFF;
+    align-items: anchor-center;
+}
+
+.logo-section {
+    width: 250px;
+    height: 68px;
+    /* cursor: pointer; */
+}
+
+.mob-search-section {
+    display: none;
+}
+
+.search-bar {
+    width: 561px;
+    height: 57px;
+    justify-content: space-between;
+    padding: 14px 45px;
+    border-radius: 8px;
+    border-width: 1px;
+    background-color: #EEF2F8;
+}
+
+.mob-header-section {
+    display: none;
+}
+
+.search-icon {
+    position: absolute;
+    /* top: 4%;
+    left: 19%; */
+    cursor: pointer;
+}
+
+.filter-icon {
+    position: absolute;
+    top: 4%;
+    right: 46%;
+    cursor: pointer;
+}
+
+/* .getapp-section {
+    width: 114px;
+    height: 68px;
+    gap: 5px;
+} */
+.android-icon {
+    width: 12px;
+    height: 20px;
+}
+
+.cart-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.header-text {
+    font-family: Inter;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.login-text {
+    color: #FFFFFF;
+}
+
+.getapp-section, .cart-section, .header-logo {
+    cursor: pointer;
+}
+
+.login-section {
+    /* width: 127px; */
+    width: 75px;
+    height: 37px;
+    padding: 5px 17px;
+    border-radius: 48px;
+    background: #004A7F;
+    cursor: pointer;
+}
+
+.right-section {
+    gap: 10%;
+}
+
+.mob {
+    display: none;
+}
+
+.search-img-1, .mob-search-img {
+    display: flex;
+    z-index: 1;
+    width: 0px;
+    align-items: center;
+}
+
+@media screen and (min-width: 1024px) and (max-width: 1128px) {
+    .search-bar {
+        width: 405px;
+        height: 52px;
+        padding: 14px 45px;
+        gap: 13px;
+        border-radius: 8px;
+        border-width: 1px;
+    }
+}
+
+@media screen and (min-width: 735px) and (max-width: 1024px) {
+    .search-bar {
+        width: 305px;
+        height: 52px;
+        padding: 14px 45px;
+        gap: 13px;
+        border-radius: 8px;
+        border-width: 1px;
+    }
+
+    .filter-icon {
+        display: none;
+    }
+
+    .right-section {
+        gap: 10px !important;
+    }
+
+    .header-section {
+        gap: 10px;
+    }
+
+    .get-app-img {
+        right: 160px !important;
+    }
+}
+
+/* Mobiel view */
+@media screen and (max-width: 426px) {
+    .search-bar {
+        width: 100%;
+        height: 52px;
+        padding: 14px 45px;
+        gap: 13px;
+        border-radius: 8px;
+        border-width: 1px;
+    }
+
+    .lap-tab {
+        display: none;
+    }
+    
+    .mob {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 53px;
+        background: #FFFFFF;
+        padding: 12px 32px;
+    }
+
+    .header-logo{
+        width: 76px;
+        height: 49px;
+        margin-top: 10px;
+    }
+    .mob-search-section {
+        display: flex;
+        margin-top: 20px;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .search-icon {
+        height: 30px;
+        padding-left: 5px;
+    }
+
+    .mob-search-icon {
+        position: absolute;
+        left: 47px;
+        cursor: pointer;
+    }
+    
+}
+
+.mob-search-section-1 {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+    
+.search-icon-1 {
+    height: 30px;
+    padding-left: 5px;
+}
+
+.mob-search-icon-1 {
+    position: absolute;
+    left: 47px;
+    cursor: pointer;
+}
+
+.get-app-img {
+    z-index: 1;
+    position: absolute;
+    top: 54px;
+    right: 187px;
+}
+
+.cart-section {
+    position: relative;
+}
+  
+.cart-count-badge {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    top: 0%;
+    left: 18px;
+    border-radius: 19px;
+    padding: 2px;
+    background-color: #BE0648;
+    color: white;           
+  
+    font-family: 'Inter';
+    font-weight: 500;
+    font-size: 8px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  

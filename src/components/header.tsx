@@ -1,0 +1,164 @@
+// src/components/Header.tsx
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './header.css'
+import HomeService from '../services/HomeService';
+import { useCart } from '../context/CartContext';
+import { useLocation } from 'react-router-dom';
+
+
+const Header = () => {
+    const [searchWords, setSearchWords] = useState('')
+    const [showImage, setShowImage] = useState(false);
+    // const [cartCount, setCartCount] = useState(0);
+    
+    const { cartCount } = useCart(); // comes from context, no need for local state
+    const navigate = useNavigate();
+    
+    const location = useLocation();
+    const isLandingPage = location.pathname === '/';
+
+    const uid = "b763e4c7-a3fe-4d34-a8b6-4596b12db614"
+    
+    useEffect(() => {
+        // Replace with your API call
+        fetchCartCount();
+    }, []);
+
+    const fetchCartCount = async () => {
+        try {
+            const payload = {
+                uid: "b763e4c7-a3fe-4d34-a8b6-4596b12db614",
+            }
+            const result = await HomeService.getCartCount(payload);
+            const count = result.filter((item: { quantity: number; }) => item.quantity > 0).length;
+            // setCartCount(count);
+            console.log('cart count:', count);
+
+          
+        } catch (error) {
+          console.error('Error fetching homepage categories:', error);
+        }
+      };
+    
+    const searchDetails = (searchWords: string) => {
+        console.log('search');
+        
+    }
+
+    const getApp = () => {
+        setShowImage(prev => !prev);
+    };
+      
+      
+    
+    const cartPage = () => {
+        navigate('/cart')
+    }
+
+    const loginPopup = () => {
+        console.log('login');
+    }
+
+
+    return (
+        <div className="">
+        
+            <div className='lap-tab header-section'> 
+                                
+                <div className="logo-section">
+                    <img src="/assets/logo.png" alt="HiSave" className="header-logo w-10 h-10" onClick={() => navigate('/')}/>
+                </div>
+
+                {/* <div className="search-section">
+                    <img src="/assets/search.png" alt="Search" className="search-icon w-5 h-5 mr-2" />
+                    <input type="text" placeholder="Search" className="search-bar"onChange={() => searchDetails(searchWords)}/>
+                    <img src="/assets/filter.png" alt="Filter" className="filter-icon w-5 h-5 ml-2 cursor-pointer" />
+                </div> */}
+
+                <div className="mob-search-section-1">
+                    <div className='search-img-1'>
+                        <img src="/assets/search.png" alt="Search" className="search-icon-1 w-5 h-5 mr-2" />
+                    </div>
+                    
+                    <div>
+                        <input type="text" placeholder="Search" className="search-bar"onChange={() => searchDetails(searchWords)}/>
+                    </div>
+                    
+                    {/* <img src="/assets/filter.png" alt="Filter" className="filter-icon w-5 h-5 ml-2 cursor-pointer" /> */}
+                </div>
+
+
+                <div className="right-section d-flex flex-grow-1 justify-content-end align-items-center">
+                    <div className="getapp-section d-flex align-items-center" onClick={() => getApp()}>
+                        <img src="/assets/android.png" alt="android" className="android-icon m-2" />
+                        <span className="header-text">Get The App</span>
+                        {showImage && (
+                            <img src="/assets/get-app.png" alt="Download App" className="get-app-img w-28" />
+                        )}
+                    </div>
+
+                    <div className="cart-section  d-flex align-items-center" onClick={() => cartPage()}>
+                        <img src="/assets/cart.png" alt="cart" className="cart-icon m-1" />
+                        {cartCount > 0 && (
+                            <span className="cart-count-badge">{cartCount}</span>
+                        )}
+                        <span className="header-text">Cart</span>
+                    </div>
+                
+                    <div className="login-section" onClick={() => loginPopup()}>
+                        {/* <img src="/assets/user.png" alt="user" className="user-icon" /> */}
+                        <span className="header-text login-text">Login</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className='mob mob-header-section'> 
+                <div className="me-3 menu-icon-section">
+                    <img src="/assets/menu.png" alt="Menu" className="menu-icon" />
+                </div>
+                
+                <div className="logo-section">
+                    <img src="/assets/logo.png" alt="HiSave" className="header-logo w-10 h-10" onClick={() => navigate('/')}/>
+                </div>
+
+                <div className="right-section d-flex flex-grow-1 justify-content-end align-items-center">
+                    {/* <div className="getapp-section d-flex align-items-center" onClick={() => getApp()}>
+                        <img src="/assets/android.png" alt="android" className="android-icon m-2" />
+                        <span className="header-text">Get The App</span>
+                    </div> */}
+
+                    <div className="cart-section  d-flex align-items-center" onClick={() => cartPage()}>
+                        <img src="/assets/cart.png" alt="cart" className="cart-icon m-1" />
+                        {cartCount > 0 && uid && (
+                            <span className="cart-count-badge">{cartCount}</span>
+                        )}
+                        {/* <span className="header-text">Cart</span> */}
+                    </div>
+                
+                    <div className="login-section" onClick={() => loginPopup()}>
+                        {/* <img src="/assets/user.png" alt="user" className="user-icon" /> */}
+                        <span className="header-text login-text">Login</span>
+                    </div>
+                </div>
+            </div>
+
+          
+            {isLandingPage && (
+                <div className="mob-search-section">
+                    <div className='mob-search-img'>
+                        <img src="/assets/search.png" alt="Search" className="search-icon w-5 h-5 mr-2" />
+                    </div>
+                    
+                    <div>
+                        <input type="text" placeholder="Search" className="search-bar"onChange={() => searchDetails(searchWords)}/>
+                    </div>
+                    
+                    {/* <img src="/assets/filter.png" alt="Filter" className="filter-icon w-5 h-5 ml-2 cursor-pointer" /> */}
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default Header;

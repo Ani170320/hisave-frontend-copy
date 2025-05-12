@@ -1,0 +1,37 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  background-color: #e8eaee;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+h1, p, span {
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 100%;
+  min-height: 100%;
+  background: #e8eaee;
+}
+
+/* src/index.css */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  /* height: 100%; */
+  width: 100%;
+  background: #EEF2F8; 
+}

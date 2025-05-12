@@ -1,0 +1,141 @@
+.offer-image {
+    margin: 9.85px;
+    border-radius: 12.32px;
+    width: 40%;
+    height: 185.99px;
+
+}
+
+.offer-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 19.71px; /* Desktop default */
+    line-height: 100%;
+    letter-spacing: 0;
+}
+  
+.offer-text {
+    font-family: Inter;
+    font-weight:2000;
+    font-size: 14.78px;
+    line-height: 20px;
+    letter-spacing: -0.37px;
+    /* letter-spacing: 0; */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.source-image {
+    position: absolute;
+    width: 49px;
+    height: 45px;
+    border-radius: 12.32px;
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+.text-style{
+    overflow-wrap: normal;
+    width: 60%;
+}
+
+.cash-badge {
+    width: 140px;
+    height: 24.85px;
+    padding: 4.93px 12.32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12.32px;
+    border-radius: 32.02px;
+    border: 1.23px solid #00774F;
+    /* font-size: 12px; optional, adjust text size if needed */
+}
+
+.voucher-badge {
+    width: 76px;
+    height: 25px;
+    gap: 12.32px;
+    padding: 4.93px 12.32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 32.02px;
+    border: 1.23px solid #FF6B00;
+}
+  
+  
+.cash-text {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 12.32px;
+    line-height: 100%;
+    letter-spacing: 0;
+    color: #00774F;
+    white-space: nowrap;
+}
+
+.voucher-text {
+    font-family: Inter;
+    font-weight: 600;
+    font-size: 12.32px;
+    line-height: 100%;
+    letter-spacing: 0px;
+    color: #FF6B00;
+}
+/* .card-align {
+    width: 100px !important;
+    object-fit: cover;
+} */
+
+/* Tablet view*/
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+    .offer-image {
+      margin: 9px;
+      border-radius: 11.25px;
+      width: 40%;
+      height: 169.93px;
+    }
+
+    .offer-title {
+        font-size: 18.01px;
+    }
+
+    .offer-text {
+        font-size: 13.5px;
+        letter-spacing: -0.34px;
+        line-height: 15px;
+    }
+}
+  
+
+/* mobile view */
+@media screen and (max-width: 425px) {
+    .offer-image {
+        margin: 8px;
+        border-radius: 10px;
+        width: 40%;
+        height: 151px;
+        /* object-fit: cover; */
+    }
+
+    .offer-title {
+        font-size: 16px;
+    }
+
+    .offer-text {
+        font-size: 12px;
+        letter-spacing: -0.3px;
+        line-height: 15px;
+    }
+
+    .source-image{
+        width: 40px;
+        height: 37px;
+        border-radius: 10px;
+        margin-top: 3px;
+        margin-left: 3px;
+    }
+}
