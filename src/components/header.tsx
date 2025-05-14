@@ -116,7 +116,7 @@ const Header = ({ onLoginClick }) => {
                         )}
                     </div>
 
-                    <div className="cart-section align-items-center" onClick={() => cartPage()}>
+                    <div className="cart-section  d-flex align-items-center" onClick={() => cartPage()}>
                         <img src="/assets/cart.png" alt="cart" className="cart-icon m-1" />
                         {cartCount > 0 && (
                             <span className="cart-count-badge">{cartCount}</span>
@@ -158,7 +158,7 @@ const Header = ({ onLoginClick }) => {
                         <span className="header-text">Get The App</span>
                     </div> */}
 
-                    <div className="cart-section  d-none align-items-center" onClick={() => cartPage()}>
+                    <div className="cart-section  d-flex align-items-center" onClick={() => cartPage()}>
                         <img src="/assets/cart.png" alt="cart" className="cart-icon m-1" />
                         {cartCount > 0 && uid && (
                             <span className="cart-count-badge">{cartCount}</span>
