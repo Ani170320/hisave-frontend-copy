@@ -25,7 +25,7 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/voucher" element={<VoucherPage />} />
-            <Route path="/offer-details/:offerId" element={<CardDetails />} />
+            <Route path="/offer-details/:offerId"  element={<CardDetails onLoginClick={() => setShowLogin(true)}/>} />
           </Routes>
           <Footer />
           {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}

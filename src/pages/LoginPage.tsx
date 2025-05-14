@@ -138,14 +138,8 @@ const LoginPopup = ({ onClose }) => {
                         <div className="mobile-input">
                         <img src="/assets/call.png" alt="email" className="call-icon" />
                         <span className="country-code">+91</span>
-                        <input
-                            type="text"
-                            className="mobile-input-box"
-                            placeholder="Enter mobile"
-                            value={mobile}
-                            onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-                            maxLength={10}
-                        />
+                        <input type="text" className="mobile-input-box" placeholder="Enter mobile" value={mobile}
+                            onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))} maxLength={10} />
                         </div>
 
                         <div className="consent-text">
@@ -186,14 +180,8 @@ const LoginPopup = ({ onClose }) => {
                         <p>Enter 4 digit OTP sent to your mobile</p>
                         <div className="otp-inputs">
                         {otp.map((digit, index) => (
-                            <input
-                            key={index}
-                            id={`otp-${index}`}
-                            type="text"
-                            maxLength="1"
-                            value={digit}
-                            onChange={(e) => handleOtpChange(index, e.target.value)}
-                            />
+                            <input key={index} id={`otp-${index}`} type="text" maxLength="1" value={digit} 
+                            onChange={(e) => handleOtpChange(index, e.target.value)} />
                         ))}
                         </div>
                         {error && <p className="error-message">{error}</p>}
@@ -212,15 +200,7 @@ const LoginPopup = ({ onClose }) => {
             )}
             {isLoading && (
                 <div className="loading-overlay">
-                    <Oval
-                    visible={true}
-                    height="80"
-                    width="80"
-                    color="#3b82f6"
-                    ariaLabel="oval-loading"
-                    wrapperStyle={{}}
-                    wrapperClass=""
-                    />
+                    <Oval visible={true} height="80" width="80" color="#3b82f6" ariaLabel="oval-loading" wrapperStyle={{}} wrapperClass="" />
                 </div>
             )}
         </div>

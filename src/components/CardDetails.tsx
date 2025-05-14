@@ -15,7 +15,7 @@ type DenominationType = {
   
   
 
-const CardDetails: React.FC = () => {
+const CardDetails = ({ onLoginClick }) => {
     const [denomination, setDenomination] = useState<DenominationType[]>([]);
     const [addedItemId, setAddedItemId] = useState<string | null>(null);
     const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -290,8 +290,16 @@ const CardDetails: React.FC = () => {
                     </div>
                 {/* )} */}
 
-                {redeemLink != '' && uid && (
-                    <a href={redeemLink}  target='_blank' rel='noopener noreferrer' className='mt-2 mb-2 redeem-offer-btn text-decoration-none'>
+                {redeemLink != '' && (
+                    <a href={uid ? redeemLink : '#'} target={uid ? '_blank' : undefined} rel={uid ? 'noopener noreferrer' : undefined} 
+                        className='mt-2 mb-2 redeem-offer-btn text-decoration-none'
+                         onClick={(e) => {
+                            if (!uid) {
+                                e.preventDefault();
+                                onLoginClick();
+                            }
+                        }} 
+                    >
                         <div className='redeem-offer'>
                             <span className="redeem-offer-txt">
                                 Redeem Offer <img src="/assets/offer-redeem.png" alt="Redeem" className="redeem-offer-icon" /> 
