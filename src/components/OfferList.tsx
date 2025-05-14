@@ -40,7 +40,7 @@ const OfferList: React.FC<OfferListProps> = ({ offers }) => {
   return (
     <div className="container py-5">
       <div className="row g-4">
-        {offers.filter((offer) => offer.source?.toLowerCase() !== 'vouchers_edenred').map((offer) => {
+        {offers.map((offer) => {
           const hasCashback = offer.summary?.toLowerCase().includes('cashback');
           const hasVouchers = offer.source?.toLowerCase().includes('vouchers_edenred');
 

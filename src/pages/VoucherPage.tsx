@@ -62,39 +62,50 @@ const VoucherPage = () => {
                     <img src="/assets/arrow-left.png" alt="back" className="back-arrow" />
                     <h2 className="cart-title">My Vouchers</h2>
                 </div>
-                <div className='vouchers-section mb-4 mt-4'>
-                    {voucherList.map((voucher, index) => (
-                        <div key={index} className="voucher-card">
-                        <div className="voucher-left">
-                            <img src="/assets/voucher.png" alt={voucher.brand_name || 'Voucher'} className="brand-logo" />
-                            <div>
-                                <h3 className="voucher-title">{voucher.brand_name} Voucher</h3>
-                                <div className="voucher-meta">
-                                    <span className="voucher-value">₹ {voucher.sold_price}</span>
-                                    <span className="voucher-days">{voucher.validity || '12 months'} Left</span>
-                                </div>
-                            </div>
+                {voucherList.length === 0 ? (
+                    <div className='vouchers-empty-section mb-4 mt-4'>
+                      <div className='empty-section'>
+                        <img src='/assets/empty.png' alt='empty' className='empty-img'/>
+                        <div className='explore mt-2' onClick={() => navigate('/')}>
+                            <span className='explore-text'>Explore Deals</span>
                         </div>
-
-                        <div className="voucher-code-section">
-                            <div className="code-txt">Voucher Code</div>
-                            <div className='voucher-code'>
-                                <div className="copy-code">
-                                    <input type="text" value={voucher.voucher_ref || ''} readOnly className="voucher-code-input" />
-                                    <img src="/assets/copy.png" alt="copy" className="copy-btn" onClick={()=> copyVoucherRef(voucher.voucher_ref)} />
-                                </div>
-                                <a href='/'  target='_blank' rel='noopener noreferrer' className='text-decoration-none'>
-                                    <div className='redeem-btn'>
-                                        <span className="redeem-txt">
-                                            Redeem <img src="/assets/redeem.png" alt="Redeem" className="redeem-icon" /> 
-                                        </span>
+                      </div>
+                    </div>
+                    ) : (
+                    <div className='vouchers-section mb-4 mt-4'>
+                        {voucherList.map((voucher, index) => (
+                            <div key={index} className="voucher-card">
+                            <div className="voucher-left">
+                                <img src="/assets/voucher.png" alt={voucher.brand_name || 'Voucher'} className="brand-logo" />
+                                <div>
+                                    <h3 className="voucher-title">{voucher.brand_name} Voucher</h3>
+                                    <div className="voucher-meta">
+                                        <span className="voucher-value">₹ {voucher.sold_price}</span>
+                                        <span className="voucher-days">{voucher.validity || '12 months'} Left</span>
                                     </div>
-                                </a>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+
+                            <div className="voucher-code-section">
+                                <div className="code-txt">Voucher Code</div>
+                                <div className='voucher-code'>
+                                    <div className="copy-code">
+                                        <input type="text" value={voucher.voucher_ref || ''} readOnly className="voucher-code-input" />
+                                        <img src="/assets/copy.png" alt="copy" className="copy-btn" onClick={()=> copyVoucherRef(voucher.voucher_ref)} />
+                                    </div>
+                                    <a href='/'  target='_blank' rel='noopener noreferrer' className='text-decoration-none'>
+                                        <div className='redeem-btn'>
+                                            <span className="redeem-txt">
+                                                Redeem <img src="/assets/redeem.png" alt="Redeem" className="redeem-icon" /> 
+                                            </span>
+                                        </div>
+                                    </a>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
                 <ToastContainer position="top-right" autoClose={2000} />
             </div>
         </div>  
