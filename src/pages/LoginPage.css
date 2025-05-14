@@ -222,3 +222,16 @@
 .login-body.center {
     text-align: center;
 }
+
+
+@media screen and (max-width: 426px) {
+    .modal-overlay {
+        align-items: end !important;
+    }
+
+    .login-modal {
+        width: 100%;
+        height: 379px;
+    }
+    
+}

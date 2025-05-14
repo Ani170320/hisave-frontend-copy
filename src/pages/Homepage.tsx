@@ -46,13 +46,10 @@ const Home: React.FC = () => {
       window.dispatchEvent(new Event("resize"));
     }, 100);
     
-    setLoading(true);
 
     fetchCategory();
     fetchCarousel();
     fetchVouchers();
-    
-    setLoading(false);
   }, []);
 
   

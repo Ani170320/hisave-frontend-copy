@@ -44,13 +44,43 @@ const CardDetails: React.FC = () => {
         year: 'numeric'
     }); // Output: "June 27 2024"
 
-    const redemptionIndex = offer.redemptionList.findIndex(item =>
-        item.toLowerCase().includes('terms & conditions')
-      );
-      
-    const howToRedeemList = redemptionIndex !== -1 ? offer.redemptionList.slice(0, redemptionIndex) : offer.redemptionList;
+    // Function to segment the list
+    const extractSections = (list) => {
+        let redeemSection = [];
+        let termsSection = [];
+        let current = null;
     
-    const termsConditionsList = redemptionIndex !== -1 ? offer.redemptionList.slice(redemptionIndex + 1) : [];
+        list.forEach((item) => {
+        const lowerItem = item.toLowerCase();
+    
+        if (lowerItem.includes('how to redeem') || lowerItem.includes('steps to redeem') ) {
+            current = 'redeem';
+            return; // skip heading itself
+        } else if (lowerItem.includes('terms & conditions')) {
+            current = 'terms';
+            return;
+        }
+    
+        if (current === 'redeem') {
+            redeemSection.push(item);
+        } else if (current === 'terms') {
+            termsSection.push(item);
+        }
+        });
+    
+        return { redeemSection, termsSection };
+    };
+    
+    // Usage
+    const { redeemSection, termsSection } = extractSections(offer.redemptionList || []);
+  
+    // const redemptionIndex = offer.redemptionList.findIndex(item =>
+    //     item.toLowerCase().includes('terms & conditions')
+    //   );
+      
+    // const howToRedeemList = redemptionIndex !== -1 ? offer.redemptionList.slice(0, redemptionIndex) : offer.redemptionList;
+    
+    // const termsConditionsList = redemptionIndex !== -1 ? offer.redemptionList.slice(redemptionIndex + 1) : [];
       
 
     if(offer.source == 'vouchers_edenred') {
@@ -260,7 +290,7 @@ const CardDetails: React.FC = () => {
                     </div>
                 {/* )} */}
 
-                {redeemLink != '' && (
+                {redeemLink != '' && uid && (
                     <a href={redeemLink}  target='_blank' rel='noopener noreferrer' className='mt-2 mb-2 redeem-offer-btn text-decoration-none'>
                         <div className='redeem-offer'>
                             <span className="redeem-offer-txt">
@@ -280,7 +310,7 @@ const CardDetails: React.FC = () => {
                     {showRedeem && (
                         <div className="expand-content mt-2">
                             <ul className="bullet-list">
-                            {howToRedeemList.map((item: string, index: number) => (
+                            {redeemSection.map((item: string, index: number) => (
                                 <li key={index}>
                                 {item.startsWith('http') ? (
                                     <a href={item} target="_blank" rel="noopener noreferrer">
@@ -307,7 +337,7 @@ const CardDetails: React.FC = () => {
                         <div className="expand-content mt-2">
                             {/* <p>{offer.redemptionList}</p> */}
                             <ul className="bullet-list">
-                                {termsConditionsList.map((item: string, index: number) => (
+                                {termsSection.map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>

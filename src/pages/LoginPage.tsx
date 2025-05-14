@@ -174,11 +174,11 @@ const LoginPopup = ({ onClose }) => {
                         </div>
 
                         <div className="payment-logos">
-                            <img src="assets/mastercard.png" alt="Mastercard" />
-                            <img src="assets/visa.png" alt="Visa" />
-                            <img src="assets/rupay.png" alt="RuPay" />
-                            <img src="assets/amex.png" alt="Amex" />
-                            <img src="assets/discover.png" alt="Discover" />
+                            <img src="/assets/mastercard.png" className='mc-logo' alt="Mastercard" />
+                            <img src="/assets/visa.png" className='visa-logo' alt="Visa" />
+                            <img src="/assets/rupay.png" className='rupay-logo' alt="RuPay" />
+                            <img src="/assets/amex.png" className='amex-logo' alt="Amex" />
+                            <img src="/assets/discover.png" className='discover-logo' alt="Discover" />
                         </div>
                     </div>
                     ) : (
@@ -202,7 +202,8 @@ const LoginPopup = ({ onClose }) => {
                             ↻ Resend OTP
                         </button>
 
-                        <button className="continue-btn" onClick={handleOtpSubmit}>
+                        <button className={`continue-btn ${otp.every(digit => digit !== '') ? 'enabled' : 'disabled'}`}
+                            disabled={!(otp.every(digit => digit !== ''))}  onClick={handleOtpSubmit}>
                             Continue
                         </button>
                     </div>

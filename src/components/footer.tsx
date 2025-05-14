@@ -70,7 +70,7 @@ const Footer = () => {
             <div className="right-section flex flex-col items-start text-start text-sm">
                 <div className='link-text'>
                     <a href="https://www.gohisave.com/terms-conditions/" target="_blank" rel="noopener noreferrer" className="footer-link  underline">T&C</a><br /><br />
-                    <a href="/about" target="_blank" rel="noopener noreferrer" className="footer-link underline">About us</a><br /><br />
+                    <a href="https://www.gohisave.com/hi-team/" target="_blank" rel="noopener noreferrer" className="footer-link underline">About us</a><br /><br />
                     <a href="https://www.gohisave.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="footer-link underline">Privacy policy</a><br /><br />
                 </div>
                 <p className="mb-1 footer-text text-sm footer-text">Copyright &copy; {new Date().getFullYear()} mWin Fintech Private Limited</p>

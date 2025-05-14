@@ -69,6 +69,7 @@ const Header = ({ onLoginClick }) => {
         setUID('');           // This will re-trigger useEffect in CartContext
         console.log('local:',localStorage.getItem('uid'))
         clearCartCount();       // Immediately clear cart
+        navigate('/')
         setLoading(false);
       };
       
@@ -143,7 +144,7 @@ const Header = ({ onLoginClick }) => {
             </div>
 
             <div className='mob mob-header-section'> 
-                <div className="me-3 menu-icon-section">
+                <div className="me-3 d-none menu-icon-section">
                     <img src="/assets/menu.png" alt="Menu" className="menu-icon" />
                 </div>
                 
@@ -174,10 +175,10 @@ const Header = ({ onLoginClick }) => {
                         </div>
                         {uid && (
                             <ul className="profile-dropdown">
-                                <li>My Profile</li>
+                                {/* <li>My Profile</li>
                                 <li>My Transactions</li>
-                                <li>My Vouchers</li>
-                                <li>Logout</li>
+                                <li>My Vouchers</li> */}
+                                <li onClick={() => handleLogout()}>Logout</li>
                             </ul>
                         )}
                     </div>
