@@ -182,7 +182,7 @@ const LoginPopup = ({ onClose }) => {
                         </div>
                     </div>
                     ) : (
-                    <div className="login-body center">
+                    <div className="otp-body center">
                         <p>Enter 4 digit OTP sent to your mobile</p>
                         <div className="otp-inputs">
                         {otp.map((digit, index) => (
