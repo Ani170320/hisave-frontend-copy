@@ -27,6 +27,8 @@ const CardDetails: React.FC = () => {
     const navigate = useNavigate();
     const { getCount } = useCart();
     const offer = location.state?.offer;
+    const redeemLink = offer.redemptionLink;
+
     let type = ''
 
     const endDateStr = offer.endDate; // "Wed, 30 Apr 2025 00:00:00 GMT"
@@ -42,11 +44,20 @@ const CardDetails: React.FC = () => {
         year: 'numeric'
     }); // Output: "June 27 2024"
 
+    const redemptionIndex = offer.redemptionList.findIndex(item =>
+        item.toLowerCase().includes('terms & conditions')
+      );
+      
+    const howToRedeemList = redemptionIndex !== -1 ? offer.redemptionList.slice(0, redemptionIndex) : offer.redemptionList;
+    
+    const termsConditionsList = redemptionIndex !== -1 ? offer.redemptionList.slice(redemptionIndex + 1) : [];
+      
+
     if(offer.source == 'vouchers_edenred') {
         type = 'Voucher'
     }
     else {
-        type = 'Voucher'
+        type = 'Offer'
     }
 
     useEffect(() => {    
@@ -249,23 +260,37 @@ const CardDetails: React.FC = () => {
                     </div>
                 {/* )} */}
 
+                {redeemLink != '' && (
+                    <a href={redeemLink}  target='_blank' rel='noopener noreferrer' className='mt-2 mb-2 redeem-offer-btn text-decoration-none'>
+                        <div className='redeem-offer'>
+                            <span className="redeem-offer-txt">
+                                Redeem Offer <img src="/assets/offer-redeem.png" alt="Redeem" className="redeem-offer-icon" /> 
+                            </span>
+                        </div>
+                    </a>
+                )}
+
                 {/* Redeem Expand Section */}
                 <div className="expand-section d-flex flex-column mt-2">
                     <div className="d-flex justify-content-between align-items-center" onClick={() => expandRedeem()}>
                         <span className="expand">How to redeem?</span>
-                        <img
-                            src='/assets/expand.png'
-                            alt='expand'
-                            className={`expand-img ${showRedeem ? 'rotate' : ''}`}
-                        />
+                        <img src='/assets/expand.png' alt='expand' className={`expand-img ${showRedeem ? 'rotate' : ''}`} />
                     </div>
 
                     {showRedeem && (
                         <div className="expand-content mt-2">
                             <ul className="bullet-list">
-                                {offer.redemptionList.map((item: string, index: number) => (
-                                    <li key={index}>{item}</li>
-                                ))}
+                            {howToRedeemList.map((item: string, index: number) => (
+                                <li key={index}>
+                                {item.startsWith('http') ? (
+                                    <a href={item} target="_blank" rel="noopener noreferrer">
+                                    {item}
+                                    </a>
+                                ) : (
+                                    item
+                                )}
+                                </li>
+                            ))}
                             </ul>
                         </div>
                     )}
@@ -275,25 +300,17 @@ const CardDetails: React.FC = () => {
                 <div className="expand-section d-flex flex-column mt-2">
                     <div className="d-flex justify-content-between align-items-center" onClick={() => expandTandC()}>
                         <span className="expand">Terms & Conditions</span>
-                        <img
-                            src='/assets/expand.png'
-                            alt='expand'
-                            className={`expand-img ${showTnC ? 'rotate' : ''}`}
-                        />
+                        <img src='/assets/expand.png' alt='expand' className={`expand-img ${showTnC ? 'rotate' : ''}`} />
                     </div>
 
                     {showTnC && (
                         <div className="expand-content mt-2">
                             {/* <p>{offer.redemptionList}</p> */}
-                            {offer.termsConditions?.trim() ? (
-                                <ul className="bullet-list">
-                                    {offer.termsConditions
-                                    .split('.')
-                                    .map((item: string, index: number) => 
-                                        item.trim() && <li key={index}>{item.trim()}</li>
-                                    )}
-                                </ul>
-                                ) : null}
+                            <ul className="bullet-list">
+                                {termsConditionsList.map((item: string, index: number) => (
+                                    <li key={index}>{item}</li>
+                                ))}
+                            </ul>
                         </div>
                     )}
                 </div>

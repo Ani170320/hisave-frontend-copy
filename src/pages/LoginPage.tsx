@@ -156,8 +156,8 @@ const LoginPopup = ({ onClose }) => {
                         />
                         <span>
                             By entering credentials, I consent to
-                            <a href="#"> TnCs </a> and
-                            <a href="#"> Privacy Statement </a> of the organization
+                            <a href="https://www.gohisave.com/terms-conditions/" target="_blank" rel="noopener noreferrer"> TnCs </a> and
+                            <a href="https://www.gohisave.com/privacy-policy" target="_blank" rel="noopener noreferrer"> Privacy Statement </a> of the organization
                         </span>
                         </div>
 
