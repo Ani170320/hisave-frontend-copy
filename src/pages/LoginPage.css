@@ -1,0 +1,224 @@
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.login-modal {
+    width: 603px;
+    height: 488px;
+    background: white;
+    top: 316px;
+    left: 419px;
+    border-radius: 9px;
+    padding: 32px;
+    gap: 30px;
+}
+
+
+.login-modal {
+    width: 603px;
+    background: white;
+    border-radius: 9px;
+    padding: 32px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.login-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 24px;
+    color: #000000;
+}
+
+.login-head {
+    font-family: 'inter';
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #000000;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.mobile-label {
+    font-family: 'inter';
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+}
+
+.mobile-input {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 12px;
+}
+
+.country-code {
+    font-family: 'inter';
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #000000;
+}
+
+.mobile-input-box {
+    font-family: 'Inter';
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 100%;
+    border: none;
+    outline: none;;
+    color: #000000;
+    flex: 1;
+}
+
+.mobile-input-box::placeholder {
+    font-family: 'inter';
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #00000033;
+}
+
+
+.consent-text {
+    display: flex;
+    align-items: flex-start;
+    font-size: 12px;
+    margin-bottom: 16px;
+    color: #555;
+}
+
+.consent-text input {
+    margin-right: 8px;
+    margin-top: 2px;
+}
+
+.consent-text a {
+    color: #007bff;
+    text-decoration: none;
+    margin: 0 2px;
+}
+
+.continue-btn {
+    width: 100%;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 16px;
+    background-color: #004A7F;
+}
+
+.continue-btn.disabled {
+    background-color: #C9C9C9;
+    cursor: not-allowed;
+}
+
+
+.continue-btn.enabled {
+    background-color: #004A7F;
+    cursor: pointer;
+}
+
+.divider {
+    text-align: center;
+    margin: 16px 0;
+    color: #999;
+    font-size: 14px;
+}
+
+.social-login {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.social-login button {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.payment-logos {
+    display: flex;
+    justify-content: center;    
+    align-items: center;
+    gap: 10px;
+}
+
+.mc-logo  {
+    width: 28px;
+    height: 18px;
+}
+
+.visa-logo {
+    width: 38px;
+    height: 12px;
+}
+
+.rupay-logo {
+    width: 52px;
+    height: 13px;
+}
+.amex-logo {
+    width: 52px;
+    height: 28px;
+}
+.discover-logo {
+    width: 58px;
+    height: 8px;
+}
+
+
+.otp-inputs {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+  
+.otp-inputs input {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+  
+.resend-otp {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+  
+.login-body.center {
+    text-align: center;
+}

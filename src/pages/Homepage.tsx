@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { CustomArrowProps } from 'react-slick';
+import { Oval } from 'react-loader-spinner';
 import Header from '../components/header';
 import Footer from '../components/footer';
 import HomeService from '../services/HomeService';
@@ -31,7 +32,7 @@ interface Offer {
 }
 
 const Home: React.FC = () => {
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [carouselImages, setCarouselImages] = useState<CarouselItem[]>([]);
   const sliderRef = useRef<Slider | null>(null);
@@ -44,47 +45,57 @@ const Home: React.FC = () => {
     setTimeout(() => {
       window.dispatchEvent(new Event("resize"));
     }, 100);
-
-    const fetchCategory = async () => {
-      try {
-        setLoading(false);
-        const result = await HomeService.getData();
-        setCategories(result?.homePageCategoryImages || []);
-      } catch (error) {
-        console.error('Error fetching homepage categories:', error);
-      }
-    };
-
-    const fetchCarousel = async () => {
-      try {
-        setLoading(false);
-        const result = await HomeService.getCarousel();
-        const imageLinks = result
-          ?.filter((offer: any) => offer?.c_image_link) // optional: remove if all have it
-          .map((offer: any) => offer.c_image_link);
-        setCarouselImages(imageLinks);
-      } catch (error) {
-        console.error('Error fetching carousel images:', error);
-      }
-    };
     
-    const fetchVouchers = async () => {
-      try {
-        setLoading(false);
-        const result = await HomeService.getVouchers();
-        console.log('res', result);console.log('res', result);
-        
-        setOffers(result || []);
-        setLoading(true);
-      } catch (error) {
-        console.error('Error fetching carousel images:', error);
-      }
-    };
-    
+    setLoading(true);
+
     fetchCategory();
     fetchCarousel();
     fetchVouchers();
+    
+    setLoading(false);
   }, []);
+
+  
+  const fetchCategory = async () => {
+    try {
+      setLoading(true);
+      const result = await HomeService.getData();
+      setCategories(result?.homePageCategoryImages || []);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error('Error fetching homepage categories:', error);
+    }
+  };
+
+  const fetchCarousel = async () => {
+    try {
+      setLoading(true);
+      const result = await HomeService.getCarousel();
+      const imageLinks = result
+        ?.filter((offer: any) => offer?.c_image_link) // optional: remove if all have it
+        .map((offer: any) => offer.c_image_link);
+      setCarouselImages(imageLinks);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error('Error fetching carousel images:', error);
+    }
+  };
+  
+  const fetchVouchers = async () => {
+    try {
+      setLoading(true);
+      const result = await HomeService.getVouchers();
+      console.log('res', result);console.log('res', result);
+      
+      setOffers(result || []);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error('Error fetching carousel images:', error);
+    }
+  };
 
   // if (loading) {
   //   return <LoadingEarnings />;
@@ -234,40 +245,47 @@ const Home: React.FC = () => {
   return (
     <div>
       {/* <Header /> */}
-
-      <div className="px-5 py-6 bg-gray-100 mt-2 mb-2" onWheel={handleWheel}>
-        <Slider ref={sliderRef} key={categories.length} {...settings}>
-          {categories.map((item, index) => (
-            <div key={index} className="flex-shrink-0">
-              <div className="flex flex-col items-center category-carousel">
-                <div className="flex items-center justify-center shadow-md category">
-                  <img src={item.icon} alt={item.name} className='category-img' />
-                </div>
-                <div className="text-center category-text">
-                  <span className="text-sm font-medium cat-txt">{item.name}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </Slider>
-      </div>
-
       
-      <div className="d-none carousel-container px-5 py-6 bg-gray-100 mt-2 mb-2" onWheel={handleWheel}>
-        <Slider className="carousel-banner" {...carousel_settings}>
-          {carouselImages.map((img, index) => (
-            <div key={index} className="px-2">
-              <img src={img} alt={`carousel-${index}`} className="carousel-img w-full h-auto rounded-lg object-cover" />
-            </div>
-          ))}
-        </Slider>
-      </div>
+        {!isLoading && (
+          <>
+          <div className="px-5 py-6 bg-gray-100 mt-2 mb-2" onWheel={handleWheel}>
+            <Slider ref={sliderRef} key={categories.length} {...settings}>
+              {categories.map((item, index) => (
+                <div key={index} className="flex-shrink-0">
+                  <div className="flex flex-col items-center category-carousel">
+                    <div className="flex items-center justify-center shadow-md category">
+                      <img src={item.icon} alt={item.name} className='category-img' />
+                    </div>
+                    <div className="text-center category-text">
+                      <span className="text-sm font-medium cat-txt">{item.name}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </Slider>
+          </div>
 
-      <div>
-        <OfferList offers={offers} />
-      </div>
+          <div className="d-none carousel-container px-5 py-6 bg-gray-100 mt-2 mb-2" onWheel={handleWheel}>
+            <Slider className="carousel-banner" {...carousel_settings}>
+              {carouselImages.map((img, index) => (
+                <div key={index} className="px-2">
+                  <img src={img} alt={`carousel-${index}`} className="carousel-img w-full h-auto rounded-lg object-cover" />
+                </div>
+              ))}
+            </Slider>
+          </div>
 
-      {/* <Footer /> */}
+          <div>
+            <OfferList offers={offers} />
+          </div>
+          </>
+        )}
+        
+        {isLoading && (
+        <div className="loading-overlay">
+            <Oval visible={true} height="80" width="80" color="#3b82f6" ariaLabel="oval-loading" wrapperStyle={{}} wrapperClass="" />
+        </div>
+      ) }
     </div>
   );
 };

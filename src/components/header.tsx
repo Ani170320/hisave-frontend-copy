@@ -1,43 +1,50 @@
 // src/components/Header.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Oval } from 'react-loader-spinner';
 import './header.css'
 import HomeService from '../services/HomeService';
 import { useCart } from '../context/CartContext';
 import { useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 
-const Header = () => {
+const Header = ({ onLoginClick }) => {
+    const [isLoading, setLoading] = useState(false);
     const [searchWords, setSearchWords] = useState('')
     const [showImage, setShowImage] = useState(false);
     // const [cartCount, setCartCount] = useState(0);
     
-    const { cartCount } = useCart(); // comes from context, no need for local state
+    const { cartCount } = useCart(); 
+    const { clearCartCount  } = useCart();
     const navigate = useNavigate();
     
     const location = useLocation();
     const isLandingPage = location.pathname === '/';
 
-    const uid = "b763e4c7-a3fe-4d34-a8b6-4596b12db614"
+    const { uid, setUID } = useAuth(); 
     
     useEffect(() => {
-        // Replace with your API call
-        fetchCartCount();
-    }, []);
+        if (uid) {
+            fetchCartCount();
+        }
+    }, [uid]);
 
     const fetchCartCount = async () => {
         try {
+            setLoading(true)
             const payload = {
-                uid: "b763e4c7-a3fe-4d34-a8b6-4596b12db614",
+                uid: uid,
             }
             const result = await HomeService.getCartCount(payload);
             const count = result.filter((item: { quantity: number; }) => item.quantity > 0).length;
             // setCartCount(count);
             console.log('cart count:', count);
-
+            setLoading(false)
           
         } catch (error) {
-          console.error('Error fetching homepage categories:', error);
+            setLoading(false)
+            console.error('Error fetching homepage categories:', error);
         }
       };
     
@@ -56,14 +63,24 @@ const Header = () => {
         navigate('/cart')
     }
 
-    const loginPopup = () => {
-        console.log('login');
-    }
-
+    const handleLogout = () => {
+        setLoading(true);
+        localStorage.removeItem('uid');
+        setUID('');           // This will re-trigger useEffect in CartContext
+        console.log('local:',localStorage.getItem('uid'))
+        clearCartCount();       // Immediately clear cart
+        setLoading(false);
+      };
+      
 
     return (
         <div className="">
-        
+        {isLoading ? (
+                <div className="loading-overlay">
+                    <Oval visible={true} height="80" width="80" color="#3b82f6" ariaLabel="oval-loading" wrapperStyle={{}} wrapperClass="" />
+                </div>
+              ) : (
+                <div>
             <div className='lap-tab header-section'> 
                                 
                 <div className="logo-section">
@@ -106,9 +123,21 @@ const Header = () => {
                         <span className="header-text">Cart</span>
                     </div>
                 
-                    <div className="login-section" onClick={() => loginPopup()}>
-                        {/* <img src="/assets/user.png" alt="user" className="user-icon" /> */}
-                        <span className="header-text login-text">Login</span>
+                    <div className="login-wrapper">
+                        <div className="login-section" onClick={!uid ? onLoginClick : undefined}>
+                            {/* <img src="/assets/user.png" alt="user" className="user-icon" /> */}
+                            <span className="header-text login-text">
+                                {uid ? 'My Profile' : 'Login'}
+                            </span>
+                        </div>
+                        {uid && (
+                            <ul className="profile-dropdown">
+                                <li>My Profile</li>
+                                <li>My Transactions</li>
+                                <li onClick={() => navigate('/voucher')}>My Vouchers</li>
+                                <li onClick={() => handleLogout()}>Logout</li>
+                            </ul>
+                        )}
                     </div>
                 </div>
             </div>
@@ -135,10 +164,22 @@ const Header = () => {
                         )}
                         {/* <span className="header-text">Cart</span> */}
                     </div>
-                
-                    <div className="login-section" onClick={() => loginPopup()}>
-                        {/* <img src="/assets/user.png" alt="user" className="user-icon" /> */}
-                        <span className="header-text login-text">Login</span>
+
+                    <div className="login-wrapper">
+                        <div className="login-section" onClick={!uid ? onLoginClick : undefined}>
+                            {/* <img src="/assets/user.png" alt="user" className="user-icon" /> */}
+                            <span className="header-text login-text">
+                                {uid ? 'My Profile' : 'Login'}
+                            </span>
+                        </div>
+                        {uid && (
+                            <ul className="profile-dropdown">
+                                <li>My Profile</li>
+                                <li>My Transactions</li>
+                                <li>My Vouchers</li>
+                                <li>Logout</li>
+                            </ul>
+                        )}
                     </div>
                 </div>
             </div>
@@ -157,6 +198,8 @@ const Header = () => {
                     {/* <img src="/assets/filter.png" alt="Filter" className="filter-icon w-5 h-5 ml-2 cursor-pointer" /> */}
                 </div>
             )}
+        </div>
+        )}
         </div>
     );
 };

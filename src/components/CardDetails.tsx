@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './cardDetails.css'; // 👈 Import the CSS file
 import HomeService from '../services/HomeService';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import './cardDetails.css'; 
+
 
 type DenominationType = {
     denominations: number;
@@ -19,7 +21,8 @@ const CardDetails: React.FC = () => {
     const [quantities, setQuantities] = useState<Record<string, number>>({});
     const [showRedeem, setShowRedeem] = useState(false);
     const [showTnC, setShowTnC] = useState(false);
-
+    const { uid, setUID } = useAuth(); 
+    
     const location = useLocation();
     const navigate = useNavigate();
     const { getCount } = useCart();
@@ -93,7 +96,7 @@ const CardDetails: React.FC = () => {
     const sendToCart = async (item: DenominationType, updatedQuantities: Record<string, number>) => {
         try {
             const payload = {
-                uid: "b763e4c7-a3fe-4d34-a8b6-4596b12db614",
+                uid: uid,
                 item_id: item.product_code,
                 quantity: updatedQuantities[item.product_code], // Only the relevant one
                 item_price: item.sold_price,
@@ -136,7 +139,7 @@ const CardDetails: React.FC = () => {
     return (
         <div className="card-details-container">
             {/* Back button and title */}
-            <div className="back-header" onClick={() => navigate(-1)}>
+            <div className="back-header" onClick={() => navigate('/')}>
                 <img src="/assets/arrow-left.png" alt="back" className="back-arrow" />
                 <h2 className="voucher-title">{type} Details</h2>
             </div>

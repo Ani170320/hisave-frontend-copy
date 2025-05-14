@@ -1,0 +1,156 @@
+.vouchers-section {
+  gap: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0 auto;
+  max-width: 800px;
+}
+
+.voucher-card {
+  width: 100%;
+  /* height: 166px; */
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-evenly;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin: 0 auto;
+}
+  
+.voucher-left {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.brand-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.voucher-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.voucher-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.voucher-value {
+  font-weight: bold;
+  color: #222;
+}
+
+.voucher-days {
+  background: #eaf0f8;
+  color: #3b5998;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+  
+.voucher-code-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.voucher-code {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.copy-code {
+  position: relative;
+  flex: 1;
+}
+
+.code-txt {
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 100%;
+  letter-spacing: 0px;
+}
+  
+.voucher-code-input {
+  width: 100%;
+  height: 44px;
+  /* padding: 10px 8px; */
+  padding: 10px 36px 10px 8px;
+  border-radius: 8px;
+  border-width: 1px;
+  /* padding: 10px; */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-family: Inter;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #94A3B8;
+  vertical-align: middle;
+}
+
+.copy-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  z-index: 2;
+  cursor: pointer;
+}
+
+.redeem-btn {
+  width: 243px;
+  justify-content: center;
+  height: 44px;
+  display: flex;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-radius: 6px;
+  background: #004A7F;
+  align-items: center;
+  cursor: pointer;
+}
+
+.redeem-txt {
+  font-family: Inter;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #FFFFFF;
+}
+
+.redeem-icon {
+  width: 24px;
+  height: 24px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* Mobiel view */
+@media screen and (max-width: 426px) {
+
+  .voucher-code {
+    flex-direction: column;
+  }
+
+  .redeem-btn {
+    width: 100%;
+  }
+}

@@ -84,7 +84,8 @@
 
 .login-section {
     /* width: 127px; */
-    width: 75px;
+    /* width: 75px; */
+    width: 100%;
     height: 37px;
     padding: 5px 17px;
     border-radius: 48px;
@@ -241,5 +242,38 @@
     display: flex;
     align-items: center;
     justify-content: center;
-  }
+}
   
+.login-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    list-style: none;
+    padding: 10px;
+    margin: 0;
+    display: none;
+    border-radius: 8px;
+    width: 180px;
+    z-index: 1000;
+}
+
+.login-wrapper:hover .profile-dropdown {
+    display: block;
+}
+
+.profile-dropdown li {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.profile-dropdown li:hover {
+    background-color: #f0f0f0;
+}

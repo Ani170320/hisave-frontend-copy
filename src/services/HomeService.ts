@@ -3,8 +3,8 @@ import axios, { AxiosInstance } from 'axios';
 
 const apiClient: AxiosInstance = axios.create({
     // baseURL: 'https://jmiazr2sjf.ap-south-1.awsapprunner.com/',
-    baseURL: 'http://localhost:5000/',
-    // baseURL: 'https://avi4zzwxh5.ap-south-1.awsapprunner.com/',
+    // baseURL: 'http://localhost:5000/',
+    baseURL: 'https://avi4zzwxh5.ap-south-1.awsapprunner.com/',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -35,8 +35,31 @@ const HomeService = {
       throw error;
     }
   },
-
+    
+  loginUser: async (params: Record<string, unknown> = {}) => {
+    try {
+      const response = await apiClient.post('newLoginUser', params);
+      console.log('login resp', response.data);
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error in getData:', error);
+      throw error;
+    }
+  },
   
+  confirmOTP: async (params: Record<string, unknown> = {}) => {
+    try {
+      const response = await apiClient.post('newConfirmOtp', params);
+      console.log('login resp', response.data);
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error in getData:', error);
+      throw error;
+    }
+  },
+
   getVouchers: async (params: Record<string, unknown> = {}) => {
     try {
       const response = await apiClient.post('getHomePageNew', params);
@@ -117,6 +140,28 @@ const HomeService = {
     try {
       const response = await apiClient.post('updateUserOrder', params);      
       return response.data.user_order_id;
+
+    } catch (error) {
+      console.error('Error in getData:', error);
+      throw error;
+    }
+  },
+
+  processPaidOrder: async (params: Record<string, unknown> = {}) => {
+    try {
+      const response = await apiClient.post('processPaidOrder', params);      
+      return response.data.user_order_id;
+
+    } catch (error) {
+      console.error('Error in getData:', error);
+      throw error;
+    }
+  },
+
+  getUserVoucher: async (params: Record<string, unknown> = {}) => {
+    try {
+      const response = await apiClient.post('getUserVouchers', params);      
+      return response.data.user_voucher;
 
     } catch (error) {
       console.error('Error in getData:', error);
