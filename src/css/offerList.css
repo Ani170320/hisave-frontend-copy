@@ -85,6 +85,12 @@
     letter-spacing: 0px;
     color: #FF6B00;
 }
+
+.search-back {
+    display: inline-flex;
+    cursor: pointer;
+}
+
 /* .card-align {
     width: 100px !important;
     object-fit: cover;

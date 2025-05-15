@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import HomeService from '../services/HomeService';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import './cardDetails.css'; 
+import '../css/cardDetails.css'; 
 
 
 type DenominationType = {
@@ -94,6 +94,57 @@ const CardDetails = ({ onLoginClick }) => {
         console.log('offer', offer, offer.source);
         window.scrollTo(0, 0);
         
+        console.log('types: ', type);
+        if(type == 'Voucher'){
+            fetchDenominations()
+        }
+        
+        if (type=='Offer') {
+            console.log('type', type);            
+            triggerUserEvent()
+        }
+    }, [offer]);
+    
+
+    if (!offer) {
+        return <div>No offer found.</div>;
+    }
+
+    const triggerUserEvent = async () => {
+        try {
+            const payload = {
+                'uid': uid,
+                'eventName': 'viewOffer',
+                'offerId': offer.offerId?.toString() ?? '',
+            };
+
+            const result = await HomeService.logUserEvent(payload)
+            console.log('result ', result);
+            
+        }
+        catch(error) {
+            console.error('Error event trigger:', error);
+        }
+    }
+
+    const triggerRedeemEvent = async () => {
+        try {
+            console.log('trigger');
+            
+            const payload = {
+                eventName: 'redeemoffer',
+                offerId: offer.offerId?.toString() ?? '',
+                eventLogInfo: redeemLink,
+            };
+
+            const result = await HomeService.logUserEventWithInfo(payload)
+            console.log('result ', result);
+        }
+        catch(error) {
+            console.error('Error event trigger:', error);
+        }
+    }
+        
     const fetchDenominations = async () => {
         try {
             const payload = {
@@ -107,15 +158,7 @@ const CardDetails = ({ onLoginClick }) => {
         } catch (error) {
           console.error('Error fetching carousel images:', error);
         }
-      };
-
-      fetchDenominations()
-    }, [offer]);
-    
-
-    if (!offer) {
-        return <div>No offer found.</div>;
-    }
+    };
 
     const expandRedeem = () => {
         setShowRedeem(!showRedeem);
@@ -297,7 +340,7 @@ const CardDetails = ({ onLoginClick }) => {
                             if (!uid) {
                                 e.preventDefault();
                                 onLoginClick();
-                            }
+                            }else triggerRedeemEvent()
                         }} 
                     >
                         <div className='redeem-offer'>

@@ -1,6 +1,6 @@
 // OfferList.tsx
 import React, { useEffect, useState } from 'react';
-import './offerList.css'
+import '../css/offerList.css'
 import { useNavigate } from 'react-router-dom';
 
 

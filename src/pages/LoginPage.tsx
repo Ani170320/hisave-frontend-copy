@@ -3,11 +3,11 @@ import { Oval } from 'react-loader-spinner';
 import HomeService from '../services/HomeService'; // adjust this import
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import './LoginPage.css';
+import '../css/LoginPage.css';
 
 const LoginPopup = ({ onClose }) => {
     const [mobile, setMobile] = useState('');
-    const { uid, setUID } = useAuth(); 
+    const { uid, setUID, user, setUser } = useAuth(); 
     const [userid, setUserid] = useState(''); 
     
     const { getCount } = useCart();
@@ -74,11 +74,17 @@ const LoginPopup = ({ onClose }) => {
                 const storedUid = localStorage.getItem('uid'); // Or sessionStorage.getItem(...)
                 if (storedUid) {
                   setUID(storedUid);
+                  const payload = {uid: storedUid}
+                  const result = await HomeService.getUser(payload);
+                  localStorage.setItem('user', result);
+                  console.log('local', localStorage.getItem('user'));
+                  setUser(result)
+                  console.log('user', result);                  
                 }                
+
                 setLoading(false)
                 getCount()
                 onClose(); // ✅ Close the modal
-                window.location.reload(); // hard reload the page
             } else {
                 setLoading(false)
                 setError('Invalid OTP'); // ❌ Show error message

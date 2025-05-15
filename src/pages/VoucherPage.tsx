@@ -5,7 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAuth } from "../context/AuthContext";
 import HomeService from '../services/HomeService';
-import './VoucherPage.css';
+import '../css/VoucherPage.css';
 
 const VoucherPage = () => {
     const [voucherList, setVoucherList] = useState([])

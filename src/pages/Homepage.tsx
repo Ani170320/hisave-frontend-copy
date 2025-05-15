@@ -6,9 +6,12 @@ import Footer from '../components/footer';
 import HomeService from '../services/HomeService';
 import Slider from 'react-slick'; // Import react-slick
 import LoadingEarnings from '../components/loader';
-import './HomePage.css';
+import '../css/HomePage.css';
 
 import OfferList from '../components/OfferList';
+import SearchList  from '../components/SearchList'
+
+import { useSearch } from '../context/SearchContext';
 
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 
@@ -38,7 +41,9 @@ const Home: React.FC = () => {
   const sliderRef = useRef<Slider | null>(null);
   const [vouchers, setVouchers] = useState<Offer[]>([]);
   const [offers, setOffers] = useState([]);
-
+  
+  
+  const { showSearchResults, setShowSearchResults, searchTerm, setSearchTerm } = useSearch();
 
   useEffect(() => {
 
@@ -94,9 +99,10 @@ const Home: React.FC = () => {
     }
   };
 
-  // if (loading) {
-  //   return <LoadingEarnings />;
-  // }
+  const searchCategory = (categoryName: string) => {
+    setSearchTerm(categoryName);
+    setShowSearchResults(true);
+  };
   
   // Carousel settings for react-slick
   const settings = {
@@ -207,7 +213,7 @@ const Home: React.FC = () => {
     dots: true,
     focusOnSelect: true,
     speed: 500,
-    draggable: true,
+    // draggable: true,
     swipeToSlide: true,
     responsive: [
       {
@@ -225,10 +231,10 @@ const Home: React.FC = () => {
     slidesToScroll: 1,
     arrows: true, // Enable default arrows
     dots: true,
-    focusOnSelect: true,
+    // focusOnSelect: true,
     speed: 500,
-    draggable: true,
-    swipeToSlide: true,
+    // draggable: true,
+    // swipeToSlide: true,
     responsive: [
       {
         breakpoint: 768,
@@ -242,15 +248,18 @@ const Home: React.FC = () => {
   return (
     <div>
       {/* <Header /> */}
-      
+    {showSearchResults ? (
+      <SearchList searchTerm={searchTerm} onBack={() => {setShowSearchResults(false); setSearchTerm('')}} />
+    ) : (
+      <>
         {!isLoading && (
           <>
           <div className="px-5 py-6 bg-gray-100 mt-2 mb-2" onWheel={handleWheel}>
             <Slider ref={sliderRef} key={categories.length} {...settings}>
-              {categories.map((item, index) => (
+              {categories.filter(item => item.name !== 'Exclusive').map((item, index) => (
                 <div key={index} className="flex-shrink-0">
                   <div className="flex flex-col items-center category-carousel">
-                    <div className="flex items-center justify-center shadow-md category">
+                    <div className="flex items-center justify-center shadow-md category "  onClick={() => searchCategory(item.name)}>
                       <img src={item.icon} alt={item.name} className='category-img' />
                     </div>
                     <div className="text-center category-text">
@@ -283,6 +292,8 @@ const Home: React.FC = () => {
             <Oval visible={true} height="80" width="80" color="#3b82f6" ariaLabel="oval-loading" wrapperStyle={{}} wrapperClass="" />
         </div>
       ) }
+      </>
+    )}
     </div>
   );
 };

@@ -12,6 +12,18 @@ const apiClient: AxiosInstance = axios.create({
 
 const HomeService = {
   
+  getUser: async (params: Record<string, unknown> = {}) => {
+    try {
+      const response = await apiClient.post('getUser', params);
+      console.log('user', response.data);
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error in getData:', error);
+      throw error;
+    }
+  },
+
   getData: async (params: Record<string, unknown> = {}) => {
     try {
       const response = await apiClient.post('getData', params);
@@ -53,6 +65,26 @@ const HomeService = {
       const response = await apiClient.post('newConfirmOtp', params);
       console.log('login resp', response.data);
       
+      return response.data;
+    } catch (error) {
+      console.error('Error in getData:', error);
+      throw error;
+    }
+  },
+
+  logUserEvent: async (params: Record<string, unknown> = {}) => {
+    try {
+      const response = await apiClient.post('logUserEvent', params);      
+      return response.data;
+    } catch (error) {
+      console.error('Error in getData:', error);
+      throw error;
+    }
+  },
+  
+  logUserEventWithInfo: async (params: Record<string, unknown> = {}) => {
+    try {
+      const response = await apiClient.post('logUserEventWithInfo', params);      
       return response.data;
     } catch (error) {
       console.error('Error in getData:', error);
@@ -169,6 +201,16 @@ const HomeService = {
     }
   },
 
+  searchOffers: async (params: Record<string, unknown> = {}) => {
+    try {
+      const response = await apiClient.post('searchOffers', params);      
+      return response.data.matching_offers;
+
+    } catch (error) {
+      console.error('Error in getData:', error);
+      throw error;
+    }
+  },
 };
 
 export default HomeService;

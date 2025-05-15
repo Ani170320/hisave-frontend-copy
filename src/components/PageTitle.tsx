@@ -12,9 +12,9 @@ const PageTitleSetter = () => {
     } else if (location.pathname === '/cart') {
         title = 'Shopping Cart';
     } else if (location.pathname.startsWith('/offer-details')) {
-        title = 'Voucher Details';
+        title = 'Offer Details';
     } else if (location.pathname === '/voucher') {
-        title = 'Voucher Details';
+        title = 'My Voucher';
     }
 
     document.title = title;
