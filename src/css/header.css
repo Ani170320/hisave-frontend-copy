@@ -44,9 +44,12 @@
 
 .filter-icon {
     position: absolute;
-    top: 4%;
-    right: 46%;
-    cursor: pointer;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    /* width: 16px;
+    height: 16px; */
+    pointer-events: none;
 }
 
 /* .getapp-section {
@@ -129,9 +132,9 @@
         border-width: 1px;
     }
 
-    .filter-icon {
+    /* .filter-icon {
         display: none;
-    }
+    } */
 
     .right-section {
         gap: 10px !important;

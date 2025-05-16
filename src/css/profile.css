@@ -1,0 +1,133 @@
+.profile-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.profile-modal {
+    width: 360px;
+    background: white;
+    border-radius: 9px;
+    padding: 32px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.profile-label {
+    font-family: 'inter';
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+}
+
+.profile-check-label {
+    font-family: Inter;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0%;
+}
+
+
+.form-group {
+    margin-bottom: 16px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 100%;
+  }
+  
+  .form-group input[type="text"],
+  .form-group input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  
+  .radio-group {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .radio-option {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+  }
+  
+  .radio-option input[type="radio"] {
+    accent-color: #6200EA;
+  }
+  
+  .submit-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background: #ccc;
+    color: #fff;
+    font-family: 'Public Sans', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: -0.3px;
+    transition: transform 0.3s;
+  }
+  
+  .submit-btn.active {
+    background: #004A7F;
+    cursor: pointer;
+  }
+
+@media screen and (max-width: 426px) {
+    .profile-modal-overlay {
+        align-items: end !important;
+    }
+
+    .profile-modal {
+        width: 100%;
+    }
+}
+
+
+
+.custom-date-picker {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px 12px;
+    background-color: white;
+  }
+  
+  .calendar-icon {
+    color: #6200EA;
+    margin-right: 8px;
+    font-size: 16px;
+  }
+  
+  .date-picker-input {
+    border: none;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    flex: 1;
+  }
+  

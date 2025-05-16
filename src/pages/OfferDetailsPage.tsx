@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import HomeService from '../services/HomeService';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import './cardDetails.css'; 
+import '../css/OfferDetailsPage.css'; 
 
 
 type DenominationType = {
@@ -15,7 +15,7 @@ type DenominationType = {
   
   
 
-const CardDetails: React.FC = () => {
+const OfferDetails = ({ onLoginClick }) => {
     const [denomination, setDenomination] = useState<DenominationType[]>([]);
     const [addedItemId, setAddedItemId] = useState<string | null>(null);
     const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -94,6 +94,57 @@ const CardDetails: React.FC = () => {
         console.log('offer', offer, offer.source);
         window.scrollTo(0, 0);
         
+        console.log('types: ', type);
+        if(type == 'Voucher'){
+            fetchDenominations()
+        }
+        
+        if (type=='Offer') {
+            console.log('type', type);            
+            triggerUserEvent()
+        }
+    }, [offer]);
+    
+
+    if (!offer) {
+        return <div>No offer found.</div>;
+    }
+
+    const triggerUserEvent = async () => {
+        try {
+            const payload = {
+                'uid': uid,
+                'eventName': 'viewOffer',
+                'offerId': offer.offerId?.toString() ?? '',
+            };
+
+            const result = await HomeService.logUserEvent(payload)
+            console.log('result ', result);
+            
+        }
+        catch(error) {
+            console.error('Error event trigger:', error);
+        }
+    }
+
+    const triggerRedeemEvent = async () => {
+        try {
+            console.log('trigger');
+            
+            const payload = {
+                eventName: 'redeemoffer',
+                offerId: offer.offerId?.toString() ?? '',
+                eventLogInfo: redeemLink,
+            };
+
+            const result = await HomeService.logUserEventWithInfo(payload)
+            console.log('result ', result);
+        }
+        catch(error) {
+            console.error('Error event trigger:', error);
+        }
+    }
+        
     const fetchDenominations = async () => {
         try {
             const payload = {
@@ -107,15 +158,7 @@ const CardDetails: React.FC = () => {
         } catch (error) {
           console.error('Error fetching carousel images:', error);
         }
-      };
-
-      fetchDenominations()
-    }, [offer]);
-    
-
-    if (!offer) {
-        return <div>No offer found.</div>;
-    }
+    };
 
     const expandRedeem = () => {
         setShowRedeem(!showRedeem);
@@ -290,8 +333,16 @@ const CardDetails: React.FC = () => {
                     </div>
                 {/* )} */}
 
-                {redeemLink != '' && uid && (
-                    <a href={redeemLink}  target='_blank' rel='noopener noreferrer' className='mt-2 mb-2 redeem-offer-btn text-decoration-none'>
+                {redeemLink != '' && (
+                    <a href={uid ? redeemLink : '#'} target={uid ? '_blank' : undefined} rel={uid ? 'noopener noreferrer' : undefined} 
+                        className='mt-2 mb-2 redeem-offer-btn text-decoration-none'
+                         onClick={(e) => {
+                            if (!uid) {
+                                e.preventDefault();
+                                onLoginClick();
+                            }else triggerRedeemEvent()
+                        }} 
+                    >
                         <div className='redeem-offer'>
                             <span className="redeem-offer-txt">
                                 Redeem Offer <img src="/assets/offer-redeem.png" alt="Redeem" className="redeem-offer-icon" /> 
@@ -349,4 +400,4 @@ const CardDetails: React.FC = () => {
     );
 };
 
-export default CardDetails;
+export default OfferDetails;

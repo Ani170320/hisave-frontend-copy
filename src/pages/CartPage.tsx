@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Oval } from 'react-loader-spinner';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './CartPage.css'
+import '../css/CartPage.css'
 import HomeService from '../services/HomeService';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';

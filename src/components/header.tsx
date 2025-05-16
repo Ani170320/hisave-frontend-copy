@@ -2,14 +2,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Oval } from 'react-loader-spinner';
-import './header.css'
+import '../css/header.css'
 import HomeService from '../services/HomeService';
 import { useCart } from '../context/CartContext';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useSearch } from '../context/SearchContext';
 
 
-const Header = ({ onLoginClick }) => {
+const Header = ({ onLoginClick, onProfileClick, onSearch }) => {
     const [isLoading, setLoading] = useState(false);
     const [searchWords, setSearchWords] = useState('')
     const [showImage, setShowImage] = useState(false);
@@ -22,14 +23,26 @@ const Header = ({ onLoginClick }) => {
     const location = useLocation();
     const isLandingPage = location.pathname === '/';
 
-    const { uid, setUID } = useAuth(); 
+    const { uid, setUID, user, setUser } = useAuth(); 
     
+    const { searchTerm, setSearchTerm, setShowSearchResults } = useSearch();
+
+
     useEffect(() => {
         if (uid) {
             fetchCartCount();
         }
     }, [uid]);
 
+
+    useEffect(() => {
+        if (searchTerm.trim().length > 3) {
+          setShowSearchResults(true);
+        } else {
+          setShowSearchResults(false);
+        }
+    }, [searchTerm, setShowSearchResults]);
+          
     const fetchCartCount = async () => {
         try {
             setLoading(true)
@@ -46,18 +59,28 @@ const Header = ({ onLoginClick }) => {
             setLoading(false)
             console.error('Error fetching homepage categories:', error);
         }
-      };
+    };
     
-    const searchDetails = (searchWords: string) => {
-        console.log('search');
-        
-    }
+    const searchDetails = (e) => {
+        const term = e.target.value;
+        setSearchTerm(term);
+        setShowSearchResults(term.trim() !== '');
+    };
+    
+    const handleInputChange = (e) => {
+        const term = e.target.value;
+        setSearchTerm(term);
+    };
+    
+    const handleSearchClick = () => {
+        if (searchTerm.trim()) {
+          setShowSearchResults(true);
+        }
+    };
 
     const getApp = () => {
         setShowImage(prev => !prev);
     };
-      
-      
     
     const cartPage = () => {
         navigate('/cart')
@@ -66,13 +89,19 @@ const Header = ({ onLoginClick }) => {
     const handleLogout = () => {
         setLoading(true);
         localStorage.removeItem('uid');
+        localStorage.removeItem('user')
         setUID('');           // This will re-trigger useEffect in CartContext
-        console.log('local:',localStorage.getItem('uid'))
+        setUser('')
+        console.log('local:',localStorage.getItem('uid'), user)
         clearCartCount();       // Immediately clear cart
         navigate('/')
         setLoading(false);
-      };
-      
+    };
+    
+    const goToHome = () => {
+        setSearchTerm('')
+        setShowSearchResults(false)
+    }
 
     return (
         <div className="">
@@ -85,7 +114,7 @@ const Header = ({ onLoginClick }) => {
             <div className='lap-tab header-section'> 
                                 
                 <div className="logo-section">
-                    <img src="/assets/logo.png" alt="HiSave" className="header-logo w-10 h-10" onClick={() => navigate('/')}/>
+                    <img src="/assets/logo.png" alt="HiSave" className="header-logo w-10 h-10" onClick={() => goToHome()}/>
                 </div>
 
                 {/* <div className="search-section">
@@ -99,8 +128,10 @@ const Header = ({ onLoginClick }) => {
                         <img src="/assets/search.png" alt="Search" className="search-icon-1 w-5 h-5 mr-2" />
                     </div>
                     
-                    <div>
-                        <input type="text" placeholder="Search" className="search-bar"onChange={() => searchDetails(searchWords)}/>
+                    <div className="">
+                        <input type="text" placeholder="Search" value={searchTerm} className="search-bar"
+                            onChange={handleInputChange}/>
+                            {/* onChange={(e) => { setSearchTerm(e.target.value)}}/> */}
                     </div>
                     
                     {/* <img src="/assets/filter.png" alt="Filter" className="filter-icon w-5 h-5 ml-2 cursor-pointer" /> */}
@@ -133,9 +164,9 @@ const Header = ({ onLoginClick }) => {
                         </div>
                         {uid && (
                             <ul className="profile-dropdown">
-                                <li>My Profile</li>
-                                <li>My Transactions</li>
-                                <li onClick={() => navigate('/voucher')}>My Vouchers</li>
+                                <li onClick={onProfileClick}>My Profile</li>
+                                {/* <li>My Transactions</li> */}
+                                {/* <li onClick={() => navigate('/voucher')}>My Vouchers</li> */}
                                 <li onClick={() => handleLogout()}>Logout</li>
                             </ul>
                         )}
@@ -175,9 +206,9 @@ const Header = ({ onLoginClick }) => {
                         </div>
                         {uid && (
                             <ul className="profile-dropdown">
-                                <li>My Profile</li>
-                                <li>My Transactions</li>
-                                <li onClick={() => navigate('/voucher')}>My Vouchers</li>
+                                <li onClick={onProfileClick}>My Profile</li>
+                                {/* <li>My Transactions</li>
+                                <li>My Vouchers</li> */}
                                 <li onClick={() => handleLogout()}>Logout</li>
                             </ul>
                         )}
@@ -192,8 +223,8 @@ const Header = ({ onLoginClick }) => {
                         <img src="/assets/search.png" alt="Search" className="search-icon w-5 h-5 mr-2" />
                     </div>
                     
-                    <div>
-                        <input type="text" placeholder="Search" className="search-bar"onChange={() => searchDetails(searchWords)}/>
+                    <div className="">
+                        <input type="text" placeholder="Search" className="search-bar" onChange={handleInputChange}/>
                     </div>
                     
                     {/* <img src="/assets/filter.png" alt="Filter" className="filter-icon w-5 h-5 ml-2 cursor-pointer" /> */}

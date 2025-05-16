@@ -3,11 +3,11 @@ import { Oval } from 'react-loader-spinner';
 import HomeService from '../services/HomeService'; // adjust this import
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import './LoginPage.css';
+import '../css/LoginPage.css';
 
 const LoginPopup = ({ onClose }) => {
     const [mobile, setMobile] = useState('');
-    const { uid, setUID } = useAuth(); 
+    const { uid, setUID, user, setUser } = useAuth(); 
     const [userid, setUserid] = useState(''); 
     
     const { getCount } = useCart();
@@ -74,11 +74,17 @@ const LoginPopup = ({ onClose }) => {
                 const storedUid = localStorage.getItem('uid'); // Or sessionStorage.getItem(...)
                 if (storedUid) {
                   setUID(storedUid);
+                  const payload = {uid: storedUid}
+                  const result = await HomeService.getUser(payload);
+                  localStorage.setItem('user', JSON.stringify(result))
+                  console.log('local', localStorage.getItem('user'));
+                  setUser(result)
+                  console.log('user', result);                  
                 }                
+
                 setLoading(false)
                 getCount()
                 onClose(); // ✅ Close the modal
-                window.location.reload(); // hard reload the page
             } else {
                 setLoading(false)
                 setError('Invalid OTP'); // ❌ Show error message
@@ -138,14 +144,8 @@ const LoginPopup = ({ onClose }) => {
                         <div className="mobile-input">
                         <img src="/assets/call.png" alt="email" className="call-icon" />
                         <span className="country-code">+91</span>
-                        <input
-                            type="text"
-                            className="mobile-input-box"
-                            placeholder="Enter mobile"
-                            value={mobile}
-                            onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-                            maxLength={10}
-                        />
+                        <input type="text" className="mobile-input-box" placeholder="Enter mobile" value={mobile}
+                            onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))} maxLength={10} />
                         </div>
 
                         <div className="consent-text">
@@ -186,14 +186,8 @@ const LoginPopup = ({ onClose }) => {
                         <p>Enter 4 digit OTP sent to your mobile</p>
                         <div className="otp-inputs">
                         {otp.map((digit, index) => (
-                            <input
-                            key={index}
-                            id={`otp-${index}`}
-                            type="text"
-                            maxLength="1"
-                            value={digit}
-                            onChange={(e) => handleOtpChange(index, e.target.value)}
-                            />
+                            <input key={index} id={`otp-${index}`} type="text" maxLength="1" value={digit} 
+                            onChange={(e) => handleOtpChange(index, e.target.value)} />
                         ))}
                         </div>
                         {error && <p className="error-message">{error}</p>}
@@ -212,15 +206,7 @@ const LoginPopup = ({ onClose }) => {
             )}
             {isLoading && (
                 <div className="loading-overlay">
-                    <Oval
-                    visible={true}
-                    height="80"
-                    width="80"
-                    color="#3b82f6"
-                    ariaLabel="oval-loading"
-                    wrapperStyle={{}}
-                    wrapperClass=""
-                    />
+                    <Oval visible={true} height="80" width="80" color="#3b82f6" ariaLabel="oval-loading" wrapperStyle={{}} wrapperClass="" />
                 </div>
             )}
         </div>
