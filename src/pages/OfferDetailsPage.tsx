@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import HomeService from '../services/HomeService';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import '../css/cardDetails.css'; 
+import '../css/OfferDetailsPage.css'; 
 
 
 type DenominationType = {
@@ -15,7 +15,7 @@ type DenominationType = {
   
   
 
-const CardDetails = ({ onLoginClick }) => {
+const OfferDetails = ({ onLoginClick }) => {
     const [denomination, setDenomination] = useState<DenominationType[]>([]);
     const [addedItemId, setAddedItemId] = useState<string | null>(null);
     const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -400,4 +400,4 @@ const CardDetails = ({ onLoginClick }) => {
     );
 };
 
-export default CardDetails;
+export default OfferDetails;

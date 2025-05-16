@@ -76,7 +76,7 @@ const LoginPopup = ({ onClose }) => {
                   setUID(storedUid);
                   const payload = {uid: storedUid}
                   const result = await HomeService.getUser(payload);
-                  localStorage.setItem('user', result);
+                  localStorage.setItem('user', JSON.stringify(result))
                   console.log('local', localStorage.getItem('user'));
                   setUser(result)
                   console.log('user', result);                  

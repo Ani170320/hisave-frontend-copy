@@ -164,7 +164,7 @@ const Header = ({ onLoginClick, onProfileClick, onSearch }) => {
                         </div>
                         {uid && (
                             <ul className="profile-dropdown">
-                                {/* <li>My Profile</li> */}
+                                <li onClick={onProfileClick}>My Profile</li>
                                 {/* <li>My Transactions</li> */}
                                 {/* <li onClick={() => navigate('/voucher')}>My Vouchers</li> */}
                                 <li onClick={() => handleLogout()}>Logout</li>
@@ -206,7 +206,7 @@ const Header = ({ onLoginClick, onProfileClick, onSearch }) => {
                         </div>
                         {uid && (
                             <ul className="profile-dropdown">
-                                {/* <li onClick={onProfileClick}>My Profile</li> */}
+                                <li onClick={onProfileClick}>My Profile</li>
                                 {/* <li>My Transactions</li>
                                 <li>My Vouchers</li> */}
                                 <li onClick={() => handleLogout()}>Logout</li>

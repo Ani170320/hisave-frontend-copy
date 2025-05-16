@@ -24,6 +24,18 @@ const HomeService = {
     }
   },
 
+  updateUser: async (params: Record<string, unknown> = {}) => {
+    try {
+      const response = await apiClient.post('updateUser', params);
+      console.log('update-user', response.data);
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error in getData:', error);
+      throw error;
+    }
+  },
+
   getData: async (params: Record<string, unknown> = {}) => {
     try {
       const response = await apiClient.post('getData', params);

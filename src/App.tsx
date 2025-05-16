@@ -7,7 +7,7 @@ import Home from './pages/Homepage';
 import Footer from './components/footer';
 import Header from './components/header';
 import CartPage from './pages/CartPage'; // make sure this file exists
-import CardDetails from './pages/CardDetails';
+import CardDetails from './pages/OfferDetailsPage';
 import VoucherPage from './pages/VoucherPage';
 import LoginPopup from './pages/LoginPage';
 import EditProfileModal from './components/profile';
