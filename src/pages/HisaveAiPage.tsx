@@ -2,15 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { useAi } from "../ai/context/AiContext";
+import { useUserCards } from "../context/UserCardContext";
+import "../css/MyCards.css";
 
 import "../ai/css/AIChatThemeStyle.css";
 import "../ai/css/AIChatStyle.css";
 
 import logo from "../ai/assets/logo.png";
 
-/* ================= ICON IMPORTS ================= */
-
-// Card Section Icons
 import exclusiveIcon from "../ai/assets/icons/exclusive.png";
 import flightIcon from "../ai/assets/icons/flight-icon.png";
 import fashionIcon from "../ai/assets/icons/Fashion.png";
@@ -22,28 +21,40 @@ import mobileIcon from "../ai/assets/icons/Mobile.png";
 import hotelIcon from "../ai/assets/icons/hotel-icon.png";
 import cardsIcon from "../ai/assets/icons/cards.png";
 
-// Header & Action Icons
 import sendIcon from "../ai/assets/icons/send-icon.png";
 import trashIcon from "../ai/assets/icons/trash.png";
 import refreshIcon from "../ai/assets/icons/refresh.png";
-    
-// Like / Dislike (for future use)
+
 import likeIcon from "../ai/assets/icons/like.png";
-import likeHighlightIcon from "../ai/assets/icons/like-highlight.png";
 import dislikeIcon from "../ai/assets/icons/dislike.png";
-import dislikeHighlightIcon from "../ai/assets/icons/dislike-highlight.png";
 
 const HisaveAiPage: React.FC = () => {
   const navigate = useNavigate();
   const { messages, loading, sendMessage, clearChat } = useAi();
+  const { cards } = useUserCards();
+
   const messageEndRef = useRef<HTMLDivElement>(null);
 
   const [input, setInput] = useState("");
   const [showChat, setShowChat] = useState(false);
+  const [showMyCardsPopup, setShowMyCardsPopup] = useState(false);
 
+  /* ================= AUTO SCROLL ================= */
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  /* ================= POPUP CHECK ================= */
+  useEffect(() => {
+    const shouldOpen = sessionStorage.getItem("openMyCardsPopup");
+
+    if (shouldOpen === "true") {
+      setShowMyCardsPopup(true);
+      sessionStorage.removeItem("openMyCardsPopup");
+    }
+  }); // ⚠️ no dependency — runs after render
+
+  /* ================= HANDLERS ================= */
 
   const handleSend = (text?: string) => {
     const messageText = text ?? input;
@@ -92,10 +103,7 @@ const HisaveAiPage: React.FC = () => {
 
         {/* ================= HEADER ================= */}
         <div className="ai-mobile-header">
-          <button className="ai-back-btn" onClick={() => navigate(-1)}>
-            ←
-          </button>
-
+          <button className="ai-back-btn" onClick={() => navigate(-1)}>←</button>
           <img src={logo} alt="HiSAVE" className="ai-logo" />
 
           <div className="ai-header-icons">
@@ -142,7 +150,7 @@ const HisaveAiPage: React.FC = () => {
           </>
         )}
 
-        {/* ================= CHAT AREA ================= */}
+        {/* ================= CHAT ================= */}
         {showChat && (
           <div className="ai-chat-communication">
             <div className="ai-chat-message-list">
@@ -158,22 +166,14 @@ const HisaveAiPage: React.FC = () => {
                   {msg.bot && (
                     <div className="ai-chat-system-text-message-block">
                       <div className="ai-chat-system-text-message">
-                        <ReactMarkdown
-                          components={{
-                            a: ({ ...props }) => (
-                              <a {...props} target="_blank" rel="noopener noreferrer" />
-                            ),
-                          }}
-                        >
+                        <ReactMarkdown>
                           {cleanMessage(msg.bot)}
                         </ReactMarkdown>
 
-                        {/* Like / Dislike Buttons */}
                         <div className="ai-feedback-row">
                           <img src={likeIcon} alt="Like" />
                           <img src={dislikeIcon} alt="Dislike" />
                         </div>
-
                       </div>
                     </div>
                   )}
@@ -217,6 +217,51 @@ const HisaveAiPage: React.FC = () => {
         </div>
 
       </div>
+
+      {/* ================= MY CARDS POPUP ================= */}
+      {showMyCardsPopup && (
+        <div className="mycards-overlay">
+          <div className="mycards-modal">
+
+            <div className="mycards-header">
+              <h2>My Cards</h2>
+              <span onClick={() => setShowMyCardsPopup(false)}>×</span>
+            </div>
+
+            <div className="mycards-tabs">
+              <div className="tab active">
+                My Cards ({cards.length})
+              </div>
+              <div
+                className="tab"
+                onClick={() => {
+                  setShowMyCardsPopup(false);
+                  navigate("/add-card");
+                }}
+              >
+                Add New Card
+              </div>
+            </div>
+
+            <div className="cards-row">
+              {cards.map((card, index) => (
+                <div key={index} className="card-box">
+                  <div className="card-top">
+                    <span>{card.network}</span>
+                    <span className="show-offer">Show Offer</span>
+                  </div>
+                  <div className="card-bottom">
+                    <span>{card.cardName}</span>
+                    <span>{card.cardType} card</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

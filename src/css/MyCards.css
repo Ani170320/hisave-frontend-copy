@@ -1,0 +1,178 @@
+/* ================= OVERLAY ================= */
+
+.mycards-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* ================= MODAL ================= */
+
+.mycards-modal {
+  width: 760px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px 28px 30px;
+  box-shadow: 0px 25px 60px rgba(0, 0, 0, 0.15);
+  animation: fadeUp 0.25s ease-in-out;
+}
+
+@keyframes fadeUp {
+  from {
+    transform: translateY(15px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}
+
+/* ================= HEADER ================= */
+
+.mycards-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.mycards-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: #111827;
+}
+
+.mycards-header span {
+  font-size: 20px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: 0.2s ease;
+}
+
+.mycards-header span:hover {
+  color: #000;
+}
+
+/* ================= TABS ================= */
+
+.mycards-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.mycards-tabs .tab {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  font-size: 14px;
+  cursor: pointer;
+  color: #374151;
+  transition: 0.2s ease;
+}
+
+.mycards-tabs .tab.active {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* ================= CARD ROW ================= */
+
+.cards-row {
+  display: flex;
+  gap: 20px;
+}
+
+/* ================= CARD BOX ================= */
+
+.card-box {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.card-box:hover {
+  transform: translateY(-3px);
+}
+
+/* ================= CARD CONTENT ================= */
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.card-top span:first-child {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1d4ed8; /* VISA blue tone */
+  letter-spacing: 0.5px;
+}
+
+.show-offer {
+  font-size: 13px;
+  color: #2563eb;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.show-offer:hover {
+  text-decoration: underline;
+}
+
+.card-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card-bottom span:first-child {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 500;
+}
+
+.card-bottom span:last-child {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ================= ADD CARD BOX ================= */
+
+.add-card-box {
+  flex: 1;
+  border-radius: 14px;
+  border: 1px dashed #d1d5db;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-card-box:hover {
+  background: #f3f4f6;
+}
+
+.add-card-box .plus {
+  font-size: 28px;
+  margin-bottom: 6px;
+  color: #9ca3af;
+}

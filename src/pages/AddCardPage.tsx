@@ -37,16 +37,18 @@ const AddCardPage: React.FC = () => {
     addCard(newCard);
 
     const paymentMethods = JSON.stringify([...cards, newCard]);
-
     sendMessage("Show offers for my cards", paymentMethods);
 
-    navigate("/hisave-ai");
+    // 🔥 Trigger popup
+    sessionStorage.setItem("openMyCardsPopup", "true");
+
+    // 🔥 Force route change
+    navigate("/hisave-ai?cards=updated");
   };
 
   return (
     <div className="addcard-overlay">
       <div className="addcard-modal">
-
         <div className="addcard-header">
           <h2>My Cards</h2>
           <span className="close-btn" onClick={() => navigate(-1)}>×</span>
@@ -59,10 +61,7 @@ const AddCardPage: React.FC = () => {
 
         <div className="form-group">
           <label>Bank Name</label>
-          <select
-            value={bankName}
-            onChange={(e) => setBankName(e.target.value)}
-          >
+          <select value={bankName} onChange={(e) => setBankName(e.target.value)}>
             <option value="">e.g. HDFC</option>
             <option>HDFC Bank</option>
             <option>ICICI Bank</option>
@@ -116,7 +115,6 @@ const AddCardPage: React.FC = () => {
         <button className="addcard-button" onClick={handleAddCard}>
           Add Card
         </button>
-
       </div>
     </div>
   );
