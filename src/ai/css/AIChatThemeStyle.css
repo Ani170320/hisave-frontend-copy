@@ -1,0 +1,18 @@
+:root {
+  --theme-chat-primary-color: #0F3341;
+  --theme-chat-screen-bgcolor: #f2f3f5;
+  --theme-chat-bgcolor: #ffffff;
+  --theme-chat-user-message-bgcolor: #0F3341;
+  --theme-chat-system-message-bgcolor: #f7f7f7;
+  --theme-chat-user-message-color: #ffffff;
+  --theme-chat-system-message-color: #413f3f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}

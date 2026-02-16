@@ -7,6 +7,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
 
+
 interface CartItem {
   item_id: string;
   item_price: number;

@@ -1,0 +1,159 @@
+.addcard-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.addcard-modal {
+  width: 500px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.15);
+  animation: popup 0.2s ease-in-out;
+  font-family: "Inter", sans-serif;
+}
+
+.addcard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.addcard-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-btn {
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.addcard-tabs {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 8px 16px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.tab.active {
+  background: #2a5bd7;
+  color: #ffffff;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 6px;
+}
+
+select,
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  outline: none;
+}
+
+select:focus,
+input:focus {
+  border-color: #2a5bd7;
+}
+
+.card-type-toggle {
+  display: flex;
+  gap: 12px;
+}
+
+.type-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f3f4f6;
+  text-align: center;
+  cursor: pointer;
+}
+
+.type-btn.active {
+  background: #2a5bd7;
+  color: white;
+  font-weight: 500;
+}
+
+.network-row {
+  display: flex;
+  gap: 14px;
+}
+
+.network {
+  flex: 1;
+  height: 60px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fafafa;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.network img {
+  height: 26px;
+}
+
+.network.active {
+  border-color: #2a5bd7;
+  box-shadow: 0 0 0 2px rgba(42, 91, 215, 0.15);
+}
+
+.addcard-button {
+  width: 100%;
+  margin-top: 22px;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-size: 15px;
+  font-weight: 500;
+  background: linear-gradient(90deg, #6b8dfb, #4e73df);
+  color: white;
+  cursor: pointer;
+}
+
+.addcard-button:hover {
+  opacity: 0.9;
+}
+
+@keyframes popup {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
