@@ -1,12 +1,6 @@
 import apiClient from "./apiClient";
 
-/*
-  This calls:
-  https://jmiazr2sjf.ap-south-1.awsapprunner.com/retrieveHSBOffers
 
-  But through proxy it becomes:
-  /api/retrieveHSBOffers
-*/
 
 export const getHSBOffers = async (payload: any) => {
   try {
@@ -18,10 +12,7 @@ export const getHSBOffers = async (payload: any) => {
   }
 };
 
-/*
-  Optional: If AI has other offer endpoints,
-  add them here in the same pattern.
-*/
+
 
 export const getOfferDetails = async (offerId: string) => {
   try {

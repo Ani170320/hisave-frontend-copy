@@ -1,36 +1,22 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "../css/AddCardPage.css";
+import "../css/MyCards.css";
 import { useUserCards } from "../context/UserCardContext";
-import { useAi } from "../ai/context/AiContext";
 
-const AddCardPage: React.FC = () => {
-  const navigate = useNavigate();
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+}
 
-  const { addCard, cards } = useUserCards();
-  const { sendMessage } = useAi();
+const MyCardsPopup: React.FC<Props> = ({ isOpen, onClose }) => {
+  const { cards, addCard } = useUserCards();
 
-  const [activeTab, setActiveTab] = useState<"cards" | "add">("add");
+  const [activeTab, setActiveTab] = useState<"cards" | "add">("cards");
   const [cardType, setCardType] = useState("credit");
   const [network, setNetwork] = useState("");
   const [bankName, setBankName] = useState("");
   const [cardName, setCardName] = useState("");
 
-  const networks = [
-    { name: "Mastercard", img: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" },
-    { name: "Visa", img: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" },
-    { name: "RuPay", img: "https://upload.wikimedia.org/wikipedia/commons/5/51/RuPay.svg" },
-    { name: "Amex", img: "https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo.svg" }
-  ];
-
-  /* ✅ SIMPLE & CORRECT CANCEL LOGIC */
-  const handleCancel = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate("/");
-    }
-  };
+  if (!isOpen) return null;
 
   const handleAddCard = () => {
     if (!bankName || !cardName || !network) {
@@ -38,33 +24,30 @@ const AddCardPage: React.FC = () => {
       return;
     }
 
-    const newCard = {
+    addCard({
       bankName,
       cardName,
       cardType,
       network,
-    };
+    });
 
-    addCard(newCard);
-
-    const paymentMethods = JSON.stringify([...cards, newCard]);
-    sendMessage("Show offers for my cards", paymentMethods);
-
-    sessionStorage.setItem("openMyCardsPopup", "true");
-
-    navigate("/hisave-ai");
+    setBankName("");
+    setCardName("");
+    setNetwork("");
+    setCardType("credit");
+    setActiveTab("cards");
   };
 
   return (
-    <div className="addcard-overlay">
-      <div className="addcard-modal">
+    <div className="mycards-overlay">
+      <div className="mycards-modal">
 
-        <div className="addcard-header">
+        <div className="mycards-header">
           <h2>My Cards</h2>
-          <span className="close-btn" onClick={handleCancel}>×</span>
+          <span onClick={onClose}>×</span>
         </div>
 
-        <div className="addcard-tabs">
+        <div className="mycards-tabs">
           <div
             className={`tab ${activeTab === "cards" ? "active" : ""}`}
             onClick={() => setActiveTab("cards")}
@@ -82,6 +65,12 @@ const AddCardPage: React.FC = () => {
 
         {activeTab === "cards" && (
           <div className="cards-row">
+            {cards.length === 0 && (
+              <div className="no-cards-box">
+                No cards added yet.
+              </div>
+            )}
+
             {cards.map((card, index) => (
               <div key={index} className="card-box">
                 <div className="card-top">
@@ -143,13 +132,13 @@ const AddCardPage: React.FC = () => {
             <div className="form-group">
               <label>Network</label>
               <div className="network-row">
-                {networks.map((item) => (
+                {["Mastercard", "Visa", "RuPay", "Amex"].map((item) => (
                   <div
-                    key={item.name}
-                    className={network === item.name ? "network active" : "network"}
-                    onClick={() => setNetwork(item.name)}
+                    key={item}
+                    className={network === item ? "network active" : "network"}
+                    onClick={() => setNetwork(item)}
                   >
-                    <img src={item.img} alt={item.name} />
+                    {item}
                   </div>
                 ))}
               </div>
@@ -166,4 +155,4 @@ const AddCardPage: React.FC = () => {
   );
 };
 
-export default AddCardPage;
+export default MyCardsPopup;

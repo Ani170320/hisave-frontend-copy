@@ -24,37 +24,38 @@ const HomeBankSection: React.FC = () => {
       const result = await HomeService.getData();
       const rawCards = result?.homePageCategoryImages || [];
 
-      // Remove duplicates only
       const uniqueCards = rawCards.filter(
         (value: any, index: number, self: any[]) =>
           index === self.findIndex((t: any) => t.name === value.name)
       );
 
-      // IMPORTANT: Do NOT filter out "all" or "best"
       setCards(uniqueCards);
-
     } catch (error) {
       console.error("Error fetching cards:", error);
     }
   };
-  
 
-  // Strong & safe bank filter
   const bankCards = cards.filter(card => {
-    const name = card.name?.toLowerCase() || "";
+    const cleanName = (card.name || "")
+      .toLowerCase()
+      .replace(/[^a-z]/g, "");
+
     return (
-      name.includes("visa") ||
-      name.includes("mastercard") ||
-      name.includes("rupay")
+      cleanName.includes("visa") ||
+      cleanName.includes("mastercard") ||
+      cleanName.includes("rupay")
     );
   });
 
   const categories = cards.filter(card => {
-    const name = card.name?.toLowerCase() || "";
+    const cleanName = (card.name || "")
+      .toLowerCase()
+      .replace(/[^a-z]/g, "");
+
     return (
-      !name.includes("visa") &&
-      !name.includes("master") &&
-      !name.includes("rupay")
+      !cleanName.includes("visa") &&
+      !cleanName.includes("mastercard") &&
+      !cleanName.includes("rupay")
     );
   });
 
@@ -69,26 +70,26 @@ const HomeBankSection: React.FC = () => {
   return (
     <div className="bank-wrapper">
 
-    {/* BANK SECTION */}
-<div className="bank-group">
+      <div className="bank-group">
 
-  {/* Bank Logos inside green container */}
-  <div className="bank-logos-container">
-    {bankCards.map((card, index) => (
-      <div key={index} className="bank-logo-item">
-        <img src={card.icon} alt={card.name} />
+        {/* ✅ THIS NOW MATCHES YOUR CSS */}
+        <div className="bank-cards-row">
+          {bankCards.map((card, index) => (
+            <div key={index} className="bank-card">
+              <h4>{card.name}</h4>
+              <img src={card.icon} alt={card.name} />
+            </div>
+          ))}
+        </div>
+
+        <button
+          className="bank-reveal-btn"
+          onClick={() => navigate("/hisave-ai")}
+        >
+          Reveal my offer
+        </button>
+
       </div>
-    ))}
-  </div>
-
-  <button
-    className="bank-reveal-btn"
-    onClick={() => navigate("/hisave-ai")}
-  >
-    Reveal my offer
-  </button>
-
-</div>
 
       {/* CATEGORY SLIDER */}
       <div className="categories-wrapper">

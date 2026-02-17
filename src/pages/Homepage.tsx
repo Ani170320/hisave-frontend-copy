@@ -3,10 +3,12 @@ import { Oval } from 'react-loader-spinner';
 import HomeService from '../services/HomeService';
 import Slider from 'react-slick';
 import '../css/HomePage.css';
+import '../css/MyCards.css';
 import HomeBankSection from "../components/HomeBankSection";
 import OfferList from '../components/OfferList';
 import SearchList from '../components/SearchList';
 import { useSearch } from '../context/SearchContext';
+import { useUserCards } from "../context/UserCardContext";
 import HeroCarousel from '../components/HeroCarousel';
 
 interface CategoryItem {
@@ -24,8 +26,11 @@ interface Offer {
 
 const Home: React.FC = () => {
   const [isLoading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [offers, setOffers] = useState<Offer[]>([]);
+  const [showMyCardsPopup, setShowMyCardsPopup] = useState(false);
+
+  const { cards } = useUserCards();
+
   const sliderRef = useRef<Slider | null>(null);
 
   const {
@@ -40,12 +45,11 @@ const Home: React.FC = () => {
       try {
         setLoading(true);
 
-        const [categoryData, voucherData] = await Promise.all([
+        const [, voucherData] = await Promise.all([
           HomeService.getData(),
           HomeService.getVouchers()
         ]);
 
-       
         setOffers(voucherData || []);
       } catch (error) {
         console.error('Error loading homepage:', error);
@@ -57,51 +61,22 @@ const Home: React.FC = () => {
     fetchAll();
   }, []);
 
-  const searchCategory = (categoryName: string) => {
-    setSearchTerm(categoryName);
-    setShowSearchResults(true);
-  };
+  /* 🔥 OPEN MY CARDS POPUP FROM HEADER */
+  useEffect(() => {
+    const shouldOpen = sessionStorage.getItem("openMyCardsPopupHome");
 
-  const settings = {
-    infinite: false,
-    slidesToShow: 10,
-    slidesToScroll: 3,
-    arrows: false,
-    dots: false,
-    speed: 500,
-    swipeToSlide: true,
-    responsive: [
-      {
-        breakpoint: 425,
-        settings: {
-          slidesToShow: 4,
-          slidesToScroll: 2,
-        },
-      },
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 8,
-          slidesToScroll: 3,
-        },
-      },
-    ],
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    if (e.deltaY > 0) {
-      sliderRef.current?.slickNext();
-    } else {
-      sliderRef.current?.slickPrev();
+    if (shouldOpen === "true") {
+      setShowMyCardsPopup(true);
+      sessionStorage.removeItem("openMyCardsPopupHome");
     }
-  };
+  }, []);
 
   return (
     <div>
 
       {showSearchResults ? (
         <SearchList
-          searchTerm={searchTerm} 
+          searchTerm={searchTerm}
           onBack={() => {
             setShowSearchResults(false);
             setSearchTerm('');
@@ -116,27 +91,55 @@ const Home: React.FC = () => {
                 height="60"
                 width="60"
                 color="#3b82f6"
-                ariaLabel="oval-loading"
               />
             </div>
           )}
 
           {!isLoading && (
             <>
-
-              {/* HERO CAROUSEL */}
               <HeroCarousel />
-
-             <HomeBankSection />
-
-            
-              {/* OFFERS SECTION */}
+              <HomeBankSection />
               <OfferList offers={offers} />
-
             </>
           )}
         </>
       )}
+
+      {/* 🔥 MY CARDS POPUP ON HOME */}
+      {showMyCardsPopup && (
+        <div className="mycards-overlay">
+          <div className="mycards-modal">
+
+            <div className="mycards-header">
+              <h2>My Cards</h2>
+              <span onClick={() => setShowMyCardsPopup(false)}>×</span>
+            </div>
+
+            <div className="mycards-tabs">
+              <div className="tab active">
+                My Cards ({cards.length})
+              </div>
+            </div>
+
+            <div className="cards-row">
+              {cards.map((card, index) => (
+                <div key={index} className="card-box">
+                  <div className="card-top">
+                    <span>{card.network}</span>
+                    <span className="show-offer">Show Offer</span>
+                  </div>
+                  <div className="card-bottom">
+                    <span>{card.cardName}</span>
+                    <span>{card.cardType} card</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

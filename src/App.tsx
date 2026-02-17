@@ -22,17 +22,17 @@ import LoginPopup from './pages/LoginPage';
 import EditProfileModal from './components/profile';
 import PageTitleSetter from './components/PageTitle';
 import HisaveAiPage from './pages/HisaveAiPage';
-import AddCardPage from './pages/AddCardPage';
+import MyCardsPopup from './components/MyCardsPopup';
 
 const AppContent = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showMyCardsPopup, setShowMyCardsPopup] = useState(false);
+
   const location = useLocation();
 
-  // 🔥 Hide Header/Footer for all AI related routes
-  const hideLayout =
-    location.pathname.startsWith("/hisave-ai") ||
-    location.pathname.startsWith("/add-card");
+  // Hide layout only for AI page
+  const hideLayout = location.pathname.startsWith("/hisave-ai");
 
   return (
     <>
@@ -40,6 +40,7 @@ const AppContent = () => {
         <Header
           onLoginClick={() => setShowLogin(true)}
           onProfileClick={() => setShowProfile(true)}
+          onMyCardsClick={() => setShowMyCardsPopup(true)}
         />
       )}
 
@@ -52,12 +53,23 @@ const AppContent = () => {
           element={<CardDetails onLoginClick={() => setShowLogin(true)} />}
         />
 
-        {/* AI Routes */}
-        <Route path="/hisave-ai/*" element={<HisaveAiPage />} />
-        <Route path="/add-card" element={<AddCardPage />} />
+        <Route
+          path="/hisave-ai/*"
+          element={
+            <HisaveAiPage
+              onShowMyCards={() => setShowMyCardsPopup(true)}
+            />
+          }
+        />
       </Routes>
 
       {!hideLayout && <Footer />}
+
+      {/* 🔥 Universal My Cards Popup */}
+      <MyCardsPopup
+        isOpen={showMyCardsPopup}
+        onClose={() => setShowMyCardsPopup(false)}
+      />
 
       {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
       {showProfile && <EditProfileModal onClose={() => setShowProfile(false)} />}

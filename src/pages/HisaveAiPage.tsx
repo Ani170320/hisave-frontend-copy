@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import { useAi } from "../ai/context/AiContext";
-import { useUserCards } from "../context/UserCardContext";
-import "../css/MyCards.css";
 
 import "../ai/css/AIChatThemeStyle.css";
 import "../ai/css/AIChatStyle.css";
@@ -28,34 +27,25 @@ import refreshIcon from "../ai/assets/icons/refresh.png";
 import likeIcon from "../ai/assets/icons/like.png";
 import dislikeIcon from "../ai/assets/icons/dislike.png";
 
-const HisaveAiPage: React.FC = () => {
+interface Props {
+  onShowMyCards: () => void;
+}
+
+const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
   const navigate = useNavigate();
   const { messages, loading, sendMessage, clearChat } = useAi();
-  const { cards } = useUserCards();
 
   const messageEndRef = useRef<HTMLDivElement>(null);
 
   const [input, setInput] = useState("");
   const [showChat, setShowChat] = useState(false);
-  const [showMyCardsPopup, setShowMyCardsPopup] = useState(false);
 
   /* ================= AUTO SCROLL ================= */
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  /* ================= POPUP CHECK ================= */
-  useEffect(() => {
-    const shouldOpen = sessionStorage.getItem("openMyCardsPopup");
-
-    if (shouldOpen === "true") {
-      setShowMyCardsPopup(true);
-      sessionStorage.removeItem("openMyCardsPopup");
-    }
-  }); // ⚠️ no dependency — runs after render
-
-  /* ================= HANDLERS ================= */
-
+  /* ================= SEND MESSAGE ================= */
   const handleSend = (text?: string) => {
     const messageText = text ?? input;
     if (!messageText.trim()) return;
@@ -72,9 +62,10 @@ const HisaveAiPage: React.FC = () => {
     }
   };
 
+  /* ================= OPTION CLICK ================= */
   const optionClick = (text: string) => {
     if (text === "Add Cards") {
-      navigate("/add-card");
+      onShowMyCards();   // 🔥 OPEN UNIVERSAL POPUP
       return;
     }
     handleSend(text);
@@ -85,11 +76,11 @@ const HisaveAiPage: React.FC = () => {
   };
 
   const options = [
+    { label: "Add Cards", icon: cardIcon },
     { label: "HiSAVE Exclusive", icon: exclusiveIcon },
     { label: "Cheapest Flights available", icon: flightIcon },
     { label: "Latest Trends in Fashion", icon: fashionIcon },
     { label: "Best Grocery Deals near you", icon: groceryIcon },
-    { label: "Add Cards", icon: cardIcon },
     { label: "Top Deals and offer for you", icon: topIcon },
     { label: "Top Discounts on Electronics", icon: electronicsIcon },
     { label: "Exclusive Mobile Offers", icon: mobileIcon },
@@ -101,7 +92,7 @@ const HisaveAiPage: React.FC = () => {
     <div className="ai-chat-container">
       <div className="ai-chat">
 
-        {/* ================= HEADER ================= */}
+        {/* HEADER */}
         <div className="ai-mobile-header">
           <button className="ai-back-btn" onClick={() => navigate(-1)}>←</button>
           <img src={logo} alt="HiSAVE" className="ai-logo" />
@@ -125,7 +116,7 @@ const HisaveAiPage: React.FC = () => {
           </div>
         </div>
 
-        {/* ================= WELCOME ================= */}
+        {/* LANDING STATE */}
         {!showChat && (
           <>
             <div className="ai-mobile-title">
@@ -150,7 +141,7 @@ const HisaveAiPage: React.FC = () => {
           </>
         )}
 
-        {/* ================= CHAT ================= */}
+        {/* CHAT */}
         {showChat && (
           <div className="ai-chat-communication">
             <div className="ai-chat-message-list">
@@ -166,7 +157,7 @@ const HisaveAiPage: React.FC = () => {
                   {msg.bot && (
                     <div className="ai-chat-system-text-message-block">
                       <div className="ai-chat-system-text-message">
-                        <ReactMarkdown>
+                        <ReactMarkdown rehypePlugins={[rehypeRaw]}>
                           {cleanMessage(msg.bot)}
                         </ReactMarkdown>
 
@@ -193,7 +184,7 @@ const HisaveAiPage: React.FC = () => {
           </div>
         )}
 
-        {/* ================= INPUT ================= */}
+        {/* INPUT */}
         <div className="ai-chat-search-panel">
           <div className="ai-chat-searchbar-container">
             <input
@@ -203,9 +194,7 @@ const HisaveAiPage: React.FC = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
             />
-          </div>
 
-          <div className="ai-chat-search-button-container">
             <button
               className="ai-chat-search-button"
               onClick={() => handleSend()}
@@ -217,51 +206,6 @@ const HisaveAiPage: React.FC = () => {
         </div>
 
       </div>
-
-      {/* ================= MY CARDS POPUP ================= */}
-      {showMyCardsPopup && (
-        <div className="mycards-overlay">
-          <div className="mycards-modal">
-
-            <div className="mycards-header">
-              <h2>My Cards</h2>
-              <span onClick={() => setShowMyCardsPopup(false)}>×</span>
-            </div>
-
-            <div className="mycards-tabs">
-              <div className="tab active">
-                My Cards ({cards.length})
-              </div>
-              <div
-                className="tab"
-                onClick={() => {
-                  setShowMyCardsPopup(false);
-                  navigate("/add-card");
-                }}
-              >
-                Add New Card
-              </div>
-            </div>
-
-            <div className="cards-row">
-              {cards.map((card, index) => (
-                <div key={index} className="card-box">
-                  <div className="card-top">
-                    <span>{card.network}</span>
-                    <span className="show-offer">Show Offer</span>
-                  </div>
-                  <div className="card-bottom">
-                    <span>{card.cardName}</span>
-                    <span>{card.cardType} card</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-          </div>
-        </div>
-      )}
-
     </div>
   );
 };

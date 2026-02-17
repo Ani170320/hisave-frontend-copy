@@ -13,38 +13,51 @@ const HeroCarousel = () => {
   }, []);
 
   useEffect(() => {
-    if (banners.length > 0) {
-      const interval = setInterval(() => {
-        setCurrentIndex(prev =>
-          prev === banners.length - 1 ? 0 : prev + 1
-        );
-      }, 4000);
+    if (!banners || banners.length === 0) return;
 
-      return () => clearInterval(interval);
-    }
+    const interval = setInterval(() => {
+      setCurrentIndex(prev =>
+        prev >= banners.length - 1 ? 0 : prev + 1
+      );
+    }, 4000);
+
+    return () => clearInterval(interval);
   }, [banners]);
 
   const fetchBanners = async () => {
     try {
       setLoading(true);
+
       const result = await HomeService.getCarousel({});
-      setBanners(result || []);
-      setLoading(false);
+
+      if (Array.isArray(result)) {
+        setBanners(result);
+      } else {
+        console.warn("Carousel API returned unexpected data:", result);
+        setBanners([]);
+      }
+
     } catch (error) {
-      setLoading(false);
       console.error('Error fetching carousel:', error);
+      setBanners([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const nextSlide = () => {
+    if (!banners.length) return;
+
     setCurrentIndex(prev =>
-      prev === banners.length - 1 ? 0 : prev + 1
+      prev >= banners.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevSlide = () => {
+    if (!banners.length) return;
+
     setCurrentIndex(prev =>
-      prev === 0 ? banners.length - 1 : prev - 1
+      prev <= 0 ? banners.length - 1 : prev - 1
     );
   };
 
@@ -56,11 +69,10 @@ const HeroCarousel = () => {
     );
   }
 
-  if (!banners.length) return null;
+  if (!banners || banners.length === 0) return null;
 
   return (
     <div className="hero-container">
-
       <div className="hero-card">
 
         <button className="arrow left-arrow" onClick={prevSlide}>
@@ -68,7 +80,7 @@ const HeroCarousel = () => {
         </button>
 
         <img
-          src={banners[currentIndex]?.imageUrl}
+          src={banners[currentIndex]?.imageUrl || ''}
           alt="banner"
           className="hero-image"
         />
@@ -78,9 +90,8 @@ const HeroCarousel = () => {
         </button>
 
       </div>
-
     </div>
   );
 };
 
-export default HeroCarousel;    
+export default HeroCarousel;

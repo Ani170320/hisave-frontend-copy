@@ -20,40 +20,34 @@ const AiContext = createContext<AiContextType | null>(null);
 
 export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const socketRef = useRef<Socket | null>(null);
-
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     socketRef.current = io(API_BASE_URL, {
-      transports: ["polling", "websocket"], // ✅ allow fallback
-      withCredentials: true
-    });
-
-    socketRef.current.on("connect", () => {
-      console.log("✅ Connected to AI server");
-    });
-
-    socketRef.current.on("connect_error", (err) => {
-      console.error("❌ Socket error:", err);
+      transports: ["polling", "websocket"],
+      withCredentials: false
     });
 
     socketRef.current.on("chat response new line", (msg: string) => {
-      setLoading(false);
+     const cleanedMsg = msg
+  .replace(/\[\d+:\d+†.*?\]/g, "")
+  .replace(/\[\d+\†.*?\]/g, "");
 
-      setMessages((prev) => {
+      setMessages(prev => {
         if (prev.length === 0) return prev;
-
         const updated = [...prev];
         const lastIndex = updated.length - 1;
 
         updated[lastIndex] = {
           ...updated[lastIndex],
-          bot: updated[lastIndex].bot + msg,
+          bot: updated[lastIndex].bot + cleanedMsg
         };
 
         return updated;
       });
+
+      setLoading(false);
     });
 
     return () => {
@@ -62,22 +56,21 @@ export const AiProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, []);
 
   const sendMessage = (text: string, paymentMethods: string = "[]") => {
-    if (!text.trim()) return;
-    if (!socketRef.current) return;
+    if (!text.trim() || !socketRef.current) return;
 
     setLoading(true);
 
     const newId = Date.now();
 
-    setMessages((prev) => [
+    setMessages(prev => [
       ...prev,
-      { id: newId, user: text, bot: "" },
+      { id: newId, user: text, bot: "" }
     ]);
 
     socketRef.current.emit("chat search", {
       who: "43275e01-9301-496f-a833-6259ba87af13",
       data: text,
-      payment_methods: paymentMethods,
+      payment_methods: paymentMethods
     });
   };
 

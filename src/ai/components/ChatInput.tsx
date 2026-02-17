@@ -28,9 +28,8 @@ const ChatInput: React.FC = () => {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-      </div>
 
-      <div className="ai-chat-search-button-container">
+        {/* BUTTON INSIDE CONTAINER */}
         <button
           className="ai-chat-search-button"
           onClick={handleSend}

@@ -1,10 +1,6 @@
 import apiClient from "./apiClient";
 
-/*
-  Fetch AI Home Carousel
-  Endpoint:
-  /retrieveCarousel
-*/
+
 
 export const getCarousel = async () => {
   try {
@@ -16,10 +12,7 @@ export const getCarousel = async () => {
   }
 };
 
-/*
-  Fetch AI Homepage Category Images
-  (If used inside AI module)
-*/
+
 
 export const getHomePageCategories = async () => {
   try {
