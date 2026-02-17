@@ -67,17 +67,35 @@ const HomeBankSection: React.FC = () => {
     sliderRef.current?.scrollBy({ left: 250, behavior: "smooth" });
   };
 
+  const generateFakeNumber = () => {
+    return "•••• •••• •••• " + Math.floor(1000 + Math.random() * 9000);
+  };
+
   return (
     <div className="bank-wrapper">
 
       <div className="bank-group">
 
-        {/* ✅ THIS NOW MATCHES YOUR CSS */}
+        {/* PREMIUM FINTECH CARDS */}
         <div className="bank-cards-row">
           {bankCards.map((card, index) => (
             <div key={index} className="bank-card">
+
               <h4>{card.name}</h4>
-              <img src={card.icon} alt={card.name} />
+
+              <div className="card-tier">
+                HiSAVE Platinum
+              </div>
+
+              <div className="card-number">
+                {generateFakeNumber()}
+              </div>
+
+              <div className="card-bottom-row">
+                <div className="card-chip"></div>
+                <img src={card.icon} alt={card.name} />
+              </div>
+
             </div>
           ))}
         </div>
