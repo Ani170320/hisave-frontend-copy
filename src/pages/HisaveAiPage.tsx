@@ -6,10 +6,7 @@ import { useAi } from "../ai/context/AiContext";
 
 import "../ai/css/AIChatThemeStyle.css";
 import "../ai/css/AIChatStyle.css";
-
 import logo from "../ai/assets/icons/Hisave logo.png";
-
-import exclusiveIcon from "../ai/assets/icons/exclusive.png";
 import flightIcon from "../ai/assets/icons/flight-icon.png";
 import fashionIcon from "../ai/assets/icons/Fashion.png";
 import groceryIcon from "../ai/assets/icons/Grocery.png";
@@ -74,7 +71,6 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
 
   const options = [
     { label: "Add Cards", icon: cardIcon },
-    { label: "HiSAVE Exclusive", icon: exclusiveIcon },
     { label: "Cheapest Flights available", icon: flightIcon },
     { label: "Latest Trends in Fashion", icon: fashionIcon },
     { label: "Best Grocery Deals near you", icon: groceryIcon },

@@ -1,5 +1,3 @@
-// src/components/OfferList.tsx
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/OfferList.css";
@@ -21,6 +19,12 @@ interface Props {
 const OfferList: React.FC<Props> = ({ offers }) => {
   const navigate = useNavigate();
 
+  const handleClick = (offer: Offer) => {
+    navigate(`/offer-details/${offer.offerId}`, {
+      state: { offer }
+    });
+  };
+
   return (
     <div className="offers-container">
       <h2 className="offers-title">Top Offers</h2>
@@ -30,32 +34,25 @@ const OfferList: React.FC<Props> = ({ offers }) => {
           <div
             key={offer.offerId}
             className="offer-card"
-            onClick={() => navigate(`/offer/${offer.offerId}`)}
+            onClick={() => handleClick(offer)}
+            style={{ cursor: "pointer" }}
           >
-            {/* IMAGE SECTION */}
             <div className="offer-image-wrapper">
               <img
                 src={offer.offerImageLink}
                 alt={offer.merchantName}
                 className="offer-image"
               />
-
               <div className="offer-gradient"></div>
-
               <div className="offer-badge">HOT DEAL</div>
-
-
             </div>
 
-            {/* CONTENT SECTION */}
             <div className="offer-info">
-
               <p>
                 Limited time offer on {offer.merchantName}. Grab now!
               </p>
             </div>
 
-            {/* BOTTOM META */}
             <div className="offer-bottom">
               <div className="offer-meta">
                 <span className="meta-label">Max Savings</span>

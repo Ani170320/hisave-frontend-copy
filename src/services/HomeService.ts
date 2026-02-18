@@ -2,22 +2,21 @@ import axios, { AxiosInstance } from 'axios';
 
 
 const apiClient: AxiosInstance = axios.create({
-  //baseURL: 'https://jmiazr2sjf.ap-south-1.awsapprunner.com/',
-  baseURL: 'http://localhost:5000/',
-  //baseURL: 'https://7c8a-113-199-228-84.ngrok-free.app/',
-  
-  headers: {
-    'Content-Type': 'application/json',
-  },
+    // baseURL: 'https://jmiazr2sjf.ap-south-1.awsapprunner.com/',
+     baseURL: 'http://localhost:5000/',
+    //baseURL: 'https://avi4zzwxh5.ap-south-1.awsapprunner.com/',
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
 const HomeService = {
-
+  
   getUser: async (params: Record<string, unknown> = {}) => {
     try {
       const response = await apiClient.post('getUser', params);
       console.log('user', response.data);
-
+      
       return response.data;
     } catch (error) {
       console.error('Error in getData:', error);
@@ -29,11 +28,11 @@ const HomeService = {
     try {
       const response = await apiClient.post('updateUser', params);
       console.log('update-user', response.data);
-
+      
       return response.data;
     } catch (error) {
       console.error('Error in getData:', error);
-      throw error;
+      throw error;  
     }
   },
 
@@ -41,43 +40,43 @@ const HomeService = {
     try {
       const response = await apiClient.post('getData', params);
       console.log('resp', response.data);
-
+      
       return response.data;
     } catch (error) {
-      console.error('Error in getData:-------------------------------------------------', error);
+      console.error('Error in getData:', error);
       throw error;
     }
   },
 
   getCarousel: async (params: Record<string, unknown> = {}) => {
     try {
-      const response = await apiClient.post('retrieveHSBOffers', params);
+      const response = await apiClient.post('retriveHSBOffers', params);
       console.log('carou resp', response.data);
-
+      
       return response.data.offers;
     } catch (error) {
       console.error('Error in getData:', error);
       throw error;
     }
   },
-
+    
   loginUser: async (params: Record<string, unknown> = {}) => {
     try {
       const response = await apiClient.post('newLoginUser', params);
       console.log('login resp', response.data);
-
+      
       return response.data;
     } catch (error) {
       console.error('Error in getData:', error);
       throw error;
     }
   },
-
+  
   confirmOTP: async (params: Record<string, unknown> = {}) => {
     try {
       const response = await apiClient.post('newConfirmOtp', params);
       console.log('login resp', response.data);
-
+      
       return response.data;
     } catch (error) {
       console.error('Error in getData:', error);
@@ -87,17 +86,17 @@ const HomeService = {
 
   logUserEvent: async (params: Record<string, unknown> = {}) => {
     try {
-      const response = await apiClient.post('logUserEvent', params);
+      const response = await apiClient.post('logUserEvent', params);      
       return response.data;
     } catch (error) {
       console.error('Error in getData:', error);
       throw error;
     }
   },
-
+  
   logUserEventWithInfo: async (params: Record<string, unknown> = {}) => {
     try {
-      const response = await apiClient.post('logUserEventWithInfo', params);
+      const response = await apiClient.post('logUserEventWithInfo', params);      
       return response.data;
     } catch (error) {
       console.error('Error in getData:', error);
@@ -109,7 +108,7 @@ const HomeService = {
     try {
       const response = await apiClient.post('getHomePageNew', params);
       console.log('vocuch resp', response.data);
-
+      
       return response.data.matching_offers;
 
     } catch (error) {
@@ -122,7 +121,7 @@ const HomeService = {
     try {
       const response = await apiClient.post('getEdenredVouchersDenominations', params);
       console.log('denom resp', response.data.vouchers);
-
+      
       return response.data.vouchers;
 
     } catch (error) {
@@ -131,12 +130,12 @@ const HomeService = {
     }
   },
 
-
+  
   insertCart: async (params: Record<string, unknown> = {}) => {
     try {
       const response = await apiClient.post('upsertCartItem', params);
       console.log('denom resp', response.data);
-
+      
       return response.data;
 
     } catch (error) {
@@ -145,15 +144,15 @@ const HomeService = {
     }
   },
 
-  getCartCount: async (params: Record<string, unknown> = {}) => {
+  getCartCount : async (params: Record<string, unknown> = {}) => {
     try {
-      const response = await apiClient.post('retrieveCartItem', params);
-      // console.log('cart', response.data.cart_items);
-
-      return response.data.cart_items;
+        const response = await apiClient.post('retrieveCartItem', params);
+        // console.log('cart', response.data.cart_items);
+      
+        return response.data.cart_items;
 
     } catch (error) {
-      console.error("Error fetching cart count:", error);
+        console.error("Error fetching cart count:", error);
     }
   },
 
@@ -161,7 +160,7 @@ const HomeService = {
     try {
       const response = await apiClient.post('generate-token', params);
       console.log('token', response.data.token);
-
+      
       return response.data.token;
 
     } catch (error) {
@@ -172,7 +171,7 @@ const HomeService = {
 
   insertUserOrder: async (params: Record<string, unknown> = {}) => {
     try {
-      const response = await apiClient.post('insertUserOrder', params);
+      const response = await apiClient.post('insertUserOrder', params);      
       return response.data.user_order_id;
 
     } catch (error) {
@@ -183,7 +182,7 @@ const HomeService = {
 
   updateUserOrder: async (params: Record<string, unknown> = {}) => {
     try {
-      const response = await apiClient.post('updateUserOrder', params);
+      const response = await apiClient.post('updateUserOrder', params);      
       return response.data.user_order_id;
 
     } catch (error) {
@@ -194,7 +193,7 @@ const HomeService = {
 
   processPaidOrder: async (params: Record<string, unknown> = {}) => {
     try {
-      const response = await apiClient.post('processPaidOrder', params);
+      const response = await apiClient.post('processPaidOrder', params);      
       return response.data.user_order_id;
 
     } catch (error) {
@@ -205,7 +204,7 @@ const HomeService = {
 
   getUserVoucher: async (params: Record<string, unknown> = {}) => {
     try {
-      const response = await apiClient.post('getUserVouchers', params);
+      const response = await apiClient.post('getUserVouchers', params);      
       return response.data.user_voucher;
 
     } catch (error) {
@@ -216,7 +215,7 @@ const HomeService = {
 
   searchOffers: async (params: Record<string, unknown> = {}) => {
     try {
-      const response = await apiClient.post('searchOffers', params);
+      const response = await apiClient.post('searchOffers', params);      
       return response.data.matching_offers;
 
     } catch (error) {

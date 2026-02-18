@@ -15,7 +15,7 @@ import { UserCardProvider } from "./context/UserCardContext";
 import Home from "./pages/Homepage";
 import Footer from "./components/footer";
 import Header from "./components/header";
-import CartPage from "./pages/CartPage";
+
 import CardDetails from "./pages/OfferDetailsPage";
 import VoucherPage from "./pages/VoucherPage";
 import LoginPopup from "./pages/LoginPage";
@@ -23,7 +23,8 @@ import EditProfileModal from "./components/profile";
 import PageTitleSetter from "./components/PageTitle";
 import HisaveAiPage from "./pages/HisaveAiPage";
 import MyCardsPopup from "./components/MyCardsPopup";
-import CardOffersPage from "./pages/CardOffersPage"; // ✅ NEW
+import CardOffersPage from "./pages/CardOffersPage";
+import SearchList from "./components/SearchList";   // ✅ ADD THIS
 
 const AppContent = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -32,7 +33,6 @@ const AppContent = () => {
 
   const location = useLocation();
 
-  // Hide header/footer only for AI page
   const hideLayout = location.pathname.startsWith("/hisave-ai");
 
   return (
@@ -49,16 +49,19 @@ const AppContent = () => {
         {/* Home */}
         <Route path="/" element={<Home />} />
 
-        {/* Cart */}
-        <Route path="/cart" element={<CartPage />} />
+        {/* 🔥 SEARCH PAGE (IMPORTANT) */}
+        <Route
+          path="/search"
+          element={<SearchList onBack={() => window.history.back()} />}
+        />
 
         {/* Voucher */}
         <Route path="/voucher" element={<VoucherPage />} />
 
-        {/* ✅ Card Offers List Page */}
+        {/* Card Offers */}
         <Route path="/offers/:cardType" element={<CardOffersPage />} />
 
-        {/* Offer Details Page */}
+        {/* Offer Details */}
         <Route
           path="/offer-details/:offerId"
           element={
@@ -79,16 +82,13 @@ const AppContent = () => {
 
       {!hideLayout && <Footer />}
 
-      {/* My Cards Popup */}
       <MyCardsPopup
         isOpen={showMyCardsPopup}
         onClose={() => setShowMyCardsPopup(false)}
       />
 
-      {/* Login Popup */}
       {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
 
-      {/* Profile Modal */}
       {showProfile && (
         <EditProfileModal onClose={() => setShowProfile(false)} />
       )}

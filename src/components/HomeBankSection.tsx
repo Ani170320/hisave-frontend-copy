@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import HomeService from "../services/HomeService";
 import { useNavigate } from "react-router-dom";
+import { useSearch } from "../context/SearchContext";
 import "../css/HomeBankSection.css";
 
 interface CardItem {
@@ -14,6 +15,8 @@ const HomeBankSection: React.FC = () => {
   const [cards, setCards] = useState<CardItem[]>([]);
   const navigate = useNavigate();
   const sliderRef = useRef<HTMLDivElement>(null);
+
+  const { setSearchTerm, setShowSearchResults } = useSearch();
 
   useEffect(() => {
     fetchCards();
@@ -29,13 +32,23 @@ const HomeBankSection: React.FC = () => {
           index === self.findIndex((t: any) => t.name === value.name)
       );
 
-      setCards(uniqueCards);
+      const filteredCards = uniqueCards.filter((card: any) => {
+        const cleanName = (card.name || "")
+          .toLowerCase()
+          .replace(/[^a-z]/g, "");
+
+        return (
+          !cleanName.includes("hisave") &&
+          !cleanName.includes("exclusive")
+        );
+      });
+
+      setCards(filteredCards);
     } catch (error) {
       console.error("Error fetching cards:", error);
     }
   };
 
-  // 🔥 Handle Card Click
   const handleCardClick = (cardName: string) => {
     const cleanName = (cardName || "")
       .toLowerCase()
@@ -43,17 +56,18 @@ const HomeBankSection: React.FC = () => {
 
     let cardType = "";
 
-    if (cleanName.includes("visa")) {
-      cardType = "visa";
-    } else if (cleanName.includes("mastercard")) {
-      cardType = "mastercard";
-    } else if (cleanName.includes("rupay")) {
-      cardType = "rupay";
-    }
+    if (cleanName.includes("visa")) cardType = "visa";
+    else if (cleanName.includes("mastercard")) cardType = "mastercard";
+    else if (cleanName.includes("rupay")) cardType = "rupay";
 
-    if (cardType) {
-      navigate(`/offers/${cardType}`);
-    }
+    if (cardType) navigate(`/offers/${cardType}`);
+  };
+
+  // 🔥 Category → Search flow
+  const handleCategoryClick = (categoryName: string) => {
+    setSearchTerm(categoryName);
+    setShowSearchResults(true);
+    navigate("/search");
   };
 
   const bankCards = cards.filter((card) => {
@@ -81,38 +95,41 @@ const HomeBankSection: React.FC = () => {
   });
 
   const scrollLeft = () => {
-    sliderRef.current?.scrollBy({ left: -250, behavior: "smooth" });
+    sliderRef.current?.scrollBy({ left: -300, behavior: "smooth" });
   };
 
   const scrollRight = () => {
-    sliderRef.current?.scrollBy({ left: 250, behavior: "smooth" });
-  };
-
-  const generateFakeNumber = () => {
-    return "•••• •••• •••• " + Math.floor(1000 + Math.random() * 9000);
+    sliderRef.current?.scrollBy({ left: 300, behavior: "smooth" });
   };
 
   return (
     <div className="bank-wrapper">
       <div className="bank-group">
 
-        {/* PREMIUM FINTECH CARDS */}
+        {/* HERO SECTION */}
+        <div className="bank-hero">
+          <p className="bank-subtitle">
+            <span className="brand-hi">Hi</span>
+            <span className="brand-save">SAVE</span>
+            : Pioneering Solution for Consumers & Merchants.
+          </p>
+
+          <h2 className="bank-title">Enjoy Savings</h2>
+
+          <p className="bank-description">
+            Exciting Deals on your cards!
+          </p>
+        </div>
+
+        {/* BANK CARDS */}
         <div className="bank-cards-row">
           {bankCards.map((card, index) => (
             <div
               key={index}
               className="bank-card"
               onClick={() => handleCardClick(card.name)}
-              style={{ cursor: "pointer" }}
             >
               <h4>{card.name}</h4>
-
-              <div className="card-tier">HiSAVE Platinum</div>
-
-              <div className="card-number">
-                {generateFakeNumber()}
-              </div>
-
               <div className="card-bottom-row">
                 <div className="card-chip"></div>
                 <img src={card.icon} alt={card.name} />
@@ -137,7 +154,12 @@ const HomeBankSection: React.FC = () => {
 
         <div className="categories-row" ref={sliderRef}>
           {categories.map((card, index) => (
-            <div key={index} className="category-card">
+            <div
+              key={index}
+              className="category-card"
+              onClick={() => handleCategoryClick(card.name)}
+              style={{ cursor: "pointer" }}
+            >
               <img src={card.icon} alt={card.name} />
               <span>{card.name}</span>
             </div>

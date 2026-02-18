@@ -6,7 +6,6 @@ import { Oval } from 'react-loader-spinner';
 import { useNavigate } from 'react-router-dom';
 import '../css/offerList.css'
 
-
 interface Offer {
   sourceImageLink: string;
   offerId: string;
@@ -14,15 +13,16 @@ interface Offer {
   merchantName: string;
   shortTitle: string;
   source: string;  
-  [key: string]: string;
-  title:string;
+  summary?: string;
+  title: string;
 }
 
 const SearchList = ({ onBack }) => {
-  const { searchTerm } = useSearch();
+  const { searchTerm, setShowSearchResults } = useSearch();
   const { uid, user } = useAuth();
+  const navigate = useNavigate();
 
-  const [offers, setOffers] = useState([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -33,17 +33,18 @@ const SearchList = ({ onBack }) => {
 
   const fetchOffers = async () => {
     try {
-      // Get current location from the browser
-      setLoading(true)
+      setLoading(true);
+      setError('');
+
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
           timeout: 10000,
         });
       });
-  
+
       const { latitude, longitude } = position.coords;
-  
+
       const search_payload = {
         searchPhrase: searchTerm,
         banks: [],
@@ -51,95 +52,101 @@ const SearchList = ({ onBack }) => {
         lat: latitude.toString(),
         long: longitude.toString(),
         user_country: "India",
-        paymentMethods: user.pmt_methods,
+        paymentMethods: user?.pmt_methods || [],
         uid: uid ? uid : "Not Logged in Web User",
       };
-  
+
       const search_data = await HomeService.searchOffers(search_payload);
-      setOffers(search_data);
-      setLoading(false)
+      setOffers(search_data || []);
     } catch (error) {
-      console.error('Error fetching offers or getting location:', error);
-      setLoading(false)
+      console.error('Error fetching offers:', error);
+      setError('Unable to fetch offers.');
+    } finally {
+      setLoading(false);
     }
   };
-  
-  const navigate = useNavigate();  // Create a navigate function
-  
-    
-  // Function to handle the card click
+
   const cardDetails = (offer: Offer) => {
-    // Navigate to the OfferDetails page, passing the offer as state        
     navigate(`/offer-details/${offer.offerId}`, { state: { offer } });
   };
 
   return (
     <div className="container py-5">
-      <div className="search-back" onClick={onBack}>
-          <img src="/assets/arrow-left.png" alt="back" className="back-arrow" />
-          <h2 className="cart-title">Search Result</h2>
+      
+      {/* 🔥 BACK BUTTON FIXED */}
+      <div
+        className="search-back"
+        onClick={() => {
+          setShowSearchResults(false);
+          onBack();
+        }}
+      >
+        <img src="/assets/arrow-left.png" alt="back" className="back-arrow" />
+        <h2 className="cart-title">Search Result</h2>
       </div>
+
       {isLoading ? (
         <div className="loading-overlay">
-            <Oval visible={true} height="80" width="80" color="#3b82f6" ariaLabel="oval-loading" wrapperStyle={{}} wrapperClass="" />
-        </div> ) : (    
+          <Oval
+            visible={true}
+            height="80"
+            width="80"
+            color="#3b82f6"
+            ariaLabel="oval-loading"
+          />
+        </div>
+      ) : (
         <div className="row g-4 mt-2">
-          
-      {offers.length === 0 && !error && (
-        <p>No offers found for "{searchTerm}"</p>
-      )}
-          {offers.filter((offer) => offer.source?.toLowerCase() !== 'vouchers_edenred').map((offer) => {
-            const hasCashback = offer.summary?.toLowerCase().includes('cashback');
-            const hasVouchers = offer.source?.toLowerCase().includes('vouchers_edenred');
 
-            return (
+          {offers.length === 0 && !error && (
+            <p>No offers found for "{searchTerm}"</p>
+          )}
+
+          {error && <p>{error}</p>}
+
+          {offers
+            .filter((offer) => offer.source?.toLowerCase() !== 'vouchers_edenred')
+            .map((offer) => (
               <div key={offer.offerId} className="col-12 col-md-6 col-lg-4">
                 <div className="card h-100 shadow-sm overflow-hidden rounded-3">
-                  <div className="d-flex w-100" style={{ cursor: 'pointer' }}  onClick={() => cardDetails(offer)}>
-                    {/* Image section */}
+                  <div
+                    className="d-flex w-100"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => cardDetails(offer)}
+                  >
                     <img
                       src={offer.offerImageLink}
                       alt={offer.title}
-                      className="offer-image rounded-3 card-align" 
+                      className="offer-image rounded-3 card-align"
                     />
+
                     <img
                       src={offer.sourceImageLink}
                       alt={offer.title}
                       className="source-image mt-2 ms-2 card-align"
                     />
-                    {/* Right content */}
-                    <div className="p-3 d-flex flex-column justify-content-start text-style" >
-                      {/* Merchant name */}
-                      <h5 className="offer-title mb-2">{offer.merchantName}</h5>
 
-                      {/* Short title */}
-                      <p className="offer-text mb-2" style={{ maxHeight: '70px', overflow: 'hidden' }}>
+                    <div className="p-3 d-flex flex-column text-style">
+                      <h5 className="offer-title mb-2">
+                        {offer.merchantName}
+                      </h5>
+
+                      <p
+                        className="offer-text mb-2"
+                        style={{ maxHeight: '70px', overflow: 'hidden' }}
+                      >
                         {offer.summary}
                       </p>
-
-                      {/* Cashback badge */}
-                      {/* {hasVouchers && (
-                        <div className="cash-badge mt-2 align-self-start">
-                            <span className="cash-text">Up to 95% Cashback</span>
-                        </div>
-                      )}
-
-                      {hasVouchers && (
-                        <div className="voucher-badge mt-2 align-self-start">
-                          <span className="voucher-text">Voucher</span>
-                        </div>
-                      )} */}
-                      
                     </div>
+
                   </div>
                 </div>
               </div>
-            );
-          })}
+          ))}
         </div>
       )}
     </div>
   );
 };
 
-export default SearchList;
+export default SearchList;  

@@ -1,7 +1,7 @@
 .card-details-container {
     padding: 20px;
 }
-  
+
 .back-header {
     display: inline-flex;
     /* flex-direction: column; */
@@ -12,13 +12,13 @@
     transition: transform 0.1s ease;
     touch-action: manipulation;
 }
-  
+
 .back-arrow {
     width: 24px;
     height: 24px;
     margin-right: 10px;
 }
-  
+
 .voucher-title {
     font-family: Inter;
     font-weight: 700;
@@ -27,20 +27,20 @@
     letter-spacing: 0%;
     margin-top: 5px;
 }
-  
+
 .image-container {
     display: flex;
     justify-content: center;
     margin-bottom: 24px;
 }
-  
+
 .card-image {
     width: 570px;
     height: 336px;
     border-radius: 10px;
     object-fit: cover;
 }
-  
+
 .offer-text-content {
     display: flex;
     flex-direction: column;
@@ -49,7 +49,7 @@
     max-width: 800px;
     margin: 0 auto;
 }
-  
+
 .merchant-name {
     font-family: 'Inter', sans-serif;
     font-weight: 700;
@@ -57,7 +57,7 @@
     line-height: 100%;
     letter-spacing: 0%;
 }
-  
+
 .offer-summary {
     font-family: 'Inter', sans-serif;
     font-weight: 400;
@@ -67,15 +67,16 @@
     margin-top: 4px;
     text-align: justify;
 }
-  
+
 .icon-container {
     width: 64px;
     height: 24px;
     display: flex;
     gap: 16px;
-    align-items: center; /* optional, centers icons vertically */
+    align-items: center;
+    /* optional, centers icons vertically */
 }
-  
+
 .valid-date-section {
     width: 100%;
     height: 64px;
@@ -85,7 +86,7 @@
     padding-bottom: 16px;
     border-bottom: 1px solid #0000001A;
 }
-  
+
 .valid {
     font-family: 'DM Sans', sans-serif;
     font-weight: 500;
@@ -94,7 +95,7 @@
     letter-spacing: 0%;
     color: #ADADAD;
 }
-  
+
 .valid-date-text {
     font-family: 'DM Sans', sans-serif;
     font-weight: 600;
@@ -103,7 +104,7 @@
     letter-spacing: 0%;
     color: #000;
 }
-  
+
 .days-section {
     display: flex;
     align-items: center;
@@ -116,7 +117,7 @@
     padding: 6px 10px;
     border-radius: 18px;
     background: #0F334133;
-    font-family: 'DM Sans', sans-serif;    
+    font-family: 'DM Sans', sans-serif;
     font-weight: 500;
     font-size: 12px;
     line-height: 100%;
@@ -126,6 +127,7 @@
     justify-content: center;
     color: #0F3341;
 }
+
 /* 
 .expand-section {
     width: 100%;
@@ -220,13 +222,13 @@
     background: #FFFFFF;
     box-shadow: 0px 8px 32px 0px #0000000F, 0px 4px 8px 0px #00000008;
 }
-  
+
 .voucher-field {
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
-  
+
 .voucher-label {
     font-family: 'Inter';
     font-weight: 500;
@@ -234,16 +236,16 @@
     color: #666;
     margin-bottom: 4px;
     line-height: 100%;
-    letter-spacing: -0.3px; 
+    letter-spacing: -0.3px;
 }
-  
+
 .voucher-value {
     font-family: 'Inter';
     font-weight: 600;
     font-size: 14px;
     color: #000;
 }
-  
+
 .discount-value {
     gap: 8px;
     display: flex;
@@ -260,7 +262,7 @@
     line-height: 100%;
     letter-spacing: -0.3px;
     color: #263238;
-  }
+}
 
 .discount-no {
     font-family: Inter;
@@ -283,7 +285,7 @@
     font-size: 14px;
     cursor: pointer;
 }
-  
+
 .qty-controls {
     width: 95px;
     height: 44px;
@@ -300,15 +302,15 @@
     font-weight: 700;
     font-size: 16px;
     line-height: 100%;
-    letter-spacing: -0.3px;    
+    letter-spacing: -0.3px;
 }
 
 .mob-voucher-section {
     display: none;
 }
-  
+
 @media screen and (max-width: 426px) {
-    
+
     .voucher-section {
         display: none;
     }
@@ -317,53 +319,52 @@
         width: 327px;
         height: 193px;
     }
-  
-.mob-voucher-section {
-    width: 100%;
-    height: 119px;
-    padding: 12px;
-    border-radius: 12px;
-    background: #FFFFFF;
-    box-shadow: 0px 8px 32px 0px #0000000F, 0px 4px 8px 0px #00000008;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .voucher-top-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .voucher-bottom-row {
-    display: flex;
-    margin-top: 4px;
-  }
-  
-  .mob-voucher-field {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  
-  .mob-voucher-label {
-    font-size: 12px;
-    font-weight: 500;
-    color: #666;
-    font-family: 'DM Sans', sans-serif;
-    margin-bottom: 2px;
-  }
-  
-  .mob-voucher-value {
-    font-size: 14px;
-    font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
-  }
-  
-  .full-width {
-    width: 100%;
-  }
-    
+
+    .mob-voucher-section {
+        width: 100%;
+        height: 119px;
+        padding: 12px;
+        border-radius: 12px;
+        background: #FFFFFF;
+        box-shadow: 0px 8px 32px 0px #0000000F, 0px 4px 8px 0px #00000008;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .voucher-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .voucher-bottom-row {
+        display: flex;
+        margin-top: 4px;
+    }
+
+    .mob-voucher-field {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .mob-voucher-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: #666;
+        font-family: 'DM Sans', sans-serif;
+        margin-bottom: 2px;
+    }
+
+    .mob-voucher-value {
+        font-size: 14px;
+        font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    .full-width {
+        width: 100%;
+    }
+
 }
-  
