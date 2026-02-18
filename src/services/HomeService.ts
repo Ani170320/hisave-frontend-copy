@@ -5,6 +5,7 @@ const apiClient: AxiosInstance = axios.create({
   //baseURL: 'https://jmiazr2sjf.ap-south-1.awsapprunner.com/',
   baseURL: 'http://localhost:5000/',
   //baseURL: 'https://7c8a-113-199-228-84.ngrok-free.app/',
+  
   headers: {
     'Content-Type': 'application/json',
   },
@@ -43,7 +44,7 @@ const HomeService = {
 
       return response.data;
     } catch (error) {
-      console.error('Error in getData:', error);
+      console.error('Error in getData:-------------------------------------------------', error);
       throw error;
     }
   },

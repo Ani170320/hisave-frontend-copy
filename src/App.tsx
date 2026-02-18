@@ -1,28 +1,29 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
-  useLocation
-} from 'react-router-dom';
+  useLocation,
+} from "react-router-dom";
 
-import { CartProvider } from './context/CartContext';
-import { AuthProvider } from './context/AuthContext';
-import { SearchProvider } from './context/SearchContext';
+import { CartProvider } from "./context/CartContext";
+import { AuthProvider } from "./context/AuthContext";
+import { SearchProvider } from "./context/SearchContext";
 import { AiProvider } from "./ai/context/AiContext";
 import { UserCardProvider } from "./context/UserCardContext";
 
-import Home from './pages/Homepage';
-import Footer from './components/footer';
-import Header from './components/header';
-import CartPage from './pages/CartPage';
-import CardDetails from './pages/OfferDetailsPage';
-import VoucherPage from './pages/VoucherPage';
-import LoginPopup from './pages/LoginPage';
-import EditProfileModal from './components/profile';
-import PageTitleSetter from './components/PageTitle';
-import HisaveAiPage from './pages/HisaveAiPage';
-import MyCardsPopup from './components/MyCardsPopup';
+import Home from "./pages/Homepage";
+import Footer from "./components/footer";
+import Header from "./components/header";
+import CartPage from "./pages/CartPage";
+import CardDetails from "./pages/OfferDetailsPage";
+import VoucherPage from "./pages/VoucherPage";
+import LoginPopup from "./pages/LoginPage";
+import EditProfileModal from "./components/profile";
+import PageTitleSetter from "./components/PageTitle";
+import HisaveAiPage from "./pages/HisaveAiPage";
+import MyCardsPopup from "./components/MyCardsPopup";
+import CardOffersPage from "./pages/CardOffersPage"; // ✅ NEW
 
 const AppContent = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -31,7 +32,7 @@ const AppContent = () => {
 
   const location = useLocation();
 
-  // Hide layout only for AI page
+  // Hide header/footer only for AI page
   const hideLayout = location.pathname.startsWith("/hisave-ai");
 
   return (
@@ -45,14 +46,27 @@ const AppContent = () => {
       )}
 
       <Routes>
+        {/* Home */}
         <Route path="/" element={<Home />} />
+
+        {/* Cart */}
         <Route path="/cart" element={<CartPage />} />
+
+        {/* Voucher */}
         <Route path="/voucher" element={<VoucherPage />} />
+
+        {/* ✅ Card Offers List Page */}
+        <Route path="/offers/:cardType" element={<CardOffersPage />} />
+
+        {/* Offer Details Page */}
         <Route
           path="/offer-details/:offerId"
-          element={<CardDetails onLoginClick={() => setShowLogin(true)} />}
+          element={
+            <CardDetails onLoginClick={() => setShowLogin(true)} />
+          }
         />
 
+        {/* AI Page */}
         <Route
           path="/hisave-ai/*"
           element={
@@ -65,14 +79,19 @@ const AppContent = () => {
 
       {!hideLayout && <Footer />}
 
-      {/* 🔥 Universal My Cards Popup */}
+      {/* My Cards Popup */}
       <MyCardsPopup
         isOpen={showMyCardsPopup}
         onClose={() => setShowMyCardsPopup(false)}
       />
 
+      {/* Login Popup */}
       {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
-      {showProfile && <EditProfileModal onClose={() => setShowProfile(false)} />}
+
+      {/* Profile Modal */}
+      {showProfile && (
+        <EditProfileModal onClose={() => setShowProfile(false)} />
+      )}
     </>
   );
 };

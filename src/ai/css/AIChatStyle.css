@@ -65,7 +65,9 @@ body {
 }
 
 .ai-logo {
-  height: 26px;
+  height: 200px;
+  width: auto;
+  object-fit: contain;
 }
 
 .ai-header-icons {

@@ -9,8 +9,6 @@ const PageTitleSetter = () => {
 
     if (location.pathname === '/') {
         title = 'Home';
-    } else if (location.pathname === '/cart') {
-        title = 'Shopping Cart';
     } else if (location.pathname.startsWith('/offer-details')) {
         title = 'Offer Details';
     } else if (location.pathname === '/voucher') {

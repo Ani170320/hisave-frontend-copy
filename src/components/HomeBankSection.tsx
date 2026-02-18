@@ -35,7 +35,28 @@ const HomeBankSection: React.FC = () => {
     }
   };
 
-  const bankCards = cards.filter(card => {
+  // 🔥 Handle Card Click
+  const handleCardClick = (cardName: string) => {
+    const cleanName = (cardName || "")
+      .toLowerCase()
+      .replace(/[^a-z]/g, "");
+
+    let cardType = "";
+
+    if (cleanName.includes("visa")) {
+      cardType = "visa";
+    } else if (cleanName.includes("mastercard")) {
+      cardType = "mastercard";
+    } else if (cleanName.includes("rupay")) {
+      cardType = "rupay";
+    }
+
+    if (cardType) {
+      navigate(`/offers/${cardType}`);
+    }
+  };
+
+  const bankCards = cards.filter((card) => {
     const cleanName = (card.name || "")
       .toLowerCase()
       .replace(/[^a-z]/g, "");
@@ -47,7 +68,7 @@ const HomeBankSection: React.FC = () => {
     );
   });
 
-  const categories = cards.filter(card => {
+  const categories = cards.filter((card) => {
     const cleanName = (card.name || "")
       .toLowerCase()
       .replace(/[^a-z]/g, "");
@@ -73,19 +94,20 @@ const HomeBankSection: React.FC = () => {
 
   return (
     <div className="bank-wrapper">
-
       <div className="bank-group">
 
         {/* PREMIUM FINTECH CARDS */}
         <div className="bank-cards-row">
           {bankCards.map((card, index) => (
-            <div key={index} className="bank-card">
-
+            <div
+              key={index}
+              className="bank-card"
+              onClick={() => handleCardClick(card.name)}
+              style={{ cursor: "pointer" }}
+            >
               <h4>{card.name}</h4>
 
-              <div className="card-tier">
-                HiSAVE Platinum
-              </div>
+              <div className="card-tier">HiSAVE Platinum</div>
 
               <div className="card-number">
                 {generateFakeNumber()}
@@ -95,7 +117,6 @@ const HomeBankSection: React.FC = () => {
                 <div className="card-chip"></div>
                 <img src={card.icon} alt={card.name} />
               </div>
-
             </div>
           ))}
         </div>
@@ -106,12 +127,10 @@ const HomeBankSection: React.FC = () => {
         >
           Reveal my offer
         </button>
-
       </div>
 
       {/* CATEGORY SLIDER */}
       <div className="categories-wrapper">
-
         <button className="slider-btn left" onClick={scrollLeft}>
           ‹
         </button>
@@ -128,9 +147,7 @@ const HomeBankSection: React.FC = () => {
         <button className="slider-btn right" onClick={scrollRight}>
           ›
         </button>
-
       </div>
-
     </div>
   );
 };

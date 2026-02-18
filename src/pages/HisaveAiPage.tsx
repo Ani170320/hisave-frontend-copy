@@ -7,7 +7,7 @@ import { useAi } from "../ai/context/AiContext";
 import "../ai/css/AIChatThemeStyle.css";
 import "../ai/css/AIChatStyle.css";
 
-import logo from "../ai/assets/logo.png";
+import logo from "../ai/assets/icons/Hisave logo.png";
 
 import exclusiveIcon from "../ai/assets/icons/exclusive.png";
 import flightIcon from "../ai/assets/icons/flight-icon.png";
@@ -40,12 +40,10 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
   const [input, setInput] = useState("");
   const [showChat, setShowChat] = useState(false);
 
-  /* ================= AUTO SCROLL ================= */
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  /* ================= SEND MESSAGE ================= */
   const handleSend = (text?: string) => {
     const messageText = text ?? input;
     if (!messageText.trim()) return;
@@ -62,10 +60,9 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
     }
   };
 
-  /* ================= OPTION CLICK ================= */
   const optionClick = (text: string) => {
     if (text === "Add Cards") {
-      onShowMyCards();   // 🔥 OPEN UNIVERSAL POPUP
+      onShowMyCards();
       return;
     }
     handleSend(text);
@@ -94,8 +91,17 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
 
         {/* HEADER */}
         <div className="ai-mobile-header">
-          <button className="ai-back-btn" onClick={() => navigate(-1)}>←</button>
-          <img src={logo} alt="HiSAVE" className="ai-logo" />
+          <button
+            className="ai-back-btn"
+            onClick={() => navigate(-1)}
+          >
+            ←
+          </button>
+
+          <div className="ai-brand">
+            <img src={logo} alt="HiSAVE" className="ai-logo" />
+            <span className="ai-title"></span>
+          </div>
 
           <div className="ai-header-icons">
             <img
