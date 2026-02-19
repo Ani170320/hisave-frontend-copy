@@ -4,7 +4,7 @@ import { useSearch } from '../context/SearchContext';
 import HomeService from '../services/HomeService';
 import { Oval } from 'react-loader-spinner';
 import { useNavigate } from 'react-router-dom';
-import '../css/offerList.css'
+import '../css/offerList.css';
 
 interface Offer {
   sourceImageLink: string;
@@ -12,7 +12,7 @@ interface Offer {
   offerImageLink: string;
   merchantName: string;
   shortTitle: string;
-  source: string;  
+  source: string;
   summary?: string;
   title: string;
 }
@@ -58,8 +58,8 @@ const SearchList = ({ onBack }) => {
 
       const search_data = await HomeService.searchOffers(search_payload);
       setOffers(search_data || []);
-    } catch (error) {
-      console.error('Error fetching offers:', error);
+    } catch (err) {
+      console.error('Error fetching offers:', err);
       setError('Unable to fetch offers.');
     } finally {
       setLoading(false);
@@ -71,9 +71,9 @@ const SearchList = ({ onBack }) => {
   };
 
   return (
-    <div className="container py-5">
-      
-      {/* 🔥 BACK BUTTON FIXED */}
+    <div className="search-container">
+
+      {/* BACK BUTTON */}
       <div
         className="search-back"
         onClick={() => {
@@ -82,71 +82,68 @@ const SearchList = ({ onBack }) => {
         }}
       >
         <img src="/assets/arrow-left.png" alt="back" className="back-arrow" />
-        <h2 className="cart-title">Search Result</h2>
+        <h2 className="search-title">Search Results</h2>
       </div>
 
       {isLoading ? (
         <div className="loading-overlay">
           <Oval
             visible={true}
-            height="80"
-            width="80"
-            color="#3b82f6"
+            height="70"
+            width="70"
+            color="#004A7F"
             ariaLabel="oval-loading"
           />
         </div>
       ) : (
-        <div className="row g-4 mt-2">
+        <div className="offers-grid">
 
           {offers.length === 0 && !error && (
-            <p>No offers found for "{searchTerm}"</p>
+            <p className="no-results">
+              No offers found for "<strong>{searchTerm}</strong>"
+            </p>
           )}
 
-          {error && <p>{error}</p>}
+          {error && <p className="error-text">{error}</p>}
 
           {offers
             .filter((offer) => offer.source?.toLowerCase() !== 'vouchers_edenred')
             .map((offer) => (
-              <div key={offer.offerId} className="col-12 col-md-6 col-lg-4">
-                <div className="card h-100 shadow-sm overflow-hidden rounded-3">
-                  <div
-                    className="d-flex w-100"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => cardDetails(offer)}
-                  >
-                    <img
-                      src={offer.offerImageLink}
-                      alt={offer.title}
-                      className="offer-image rounded-3 card-align"
-                    />
+              <div
+                key={offer.offerId}
+                className="offer-card"
+                onClick={() => cardDetails(offer)}
+              >
+                <div className="offer-image-wrapper">
+                  <img
+                    src={offer.offerImageLink}
+                    alt={offer.title}
+                    className="offer-image"
+                  />
 
-                    <img
-                      src={offer.sourceImageLink}
-                      alt={offer.title}
-                      className="source-image mt-2 ms-2 card-align"
-                    />
+                  <img
+                    src={offer.sourceImageLink}
+                    alt="source"
+                    className="source-badge"
+                  />
+                </div>
 
-                    <div className="p-3 d-flex flex-column text-style">
-                      <h5 className="offer-title mb-2">
-                        {offer.merchantName}
-                      </h5>
+                <div className="offer-content">
+                  <h3 className="offer-title">
+                    {offer.merchantName}
+                  </h3>
 
-                      <p
-                        className="offer-text mb-2"
-                        style={{ maxHeight: '70px', overflow: 'hidden' }}
-                      >
-                        {offer.summary}
-                      </p>
-                    </div>
-
-                  </div>
+                  <p className="offer-description">
+                    {offer.summary || "Exciting offer available now."}
+                  </p>
                 </div>
               </div>
           ))}
+
         </div>
       )}
     </div>
   );
 };
 
-export default SearchList;  
+export default SearchList;

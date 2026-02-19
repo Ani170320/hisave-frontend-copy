@@ -24,7 +24,8 @@ import PageTitleSetter from "./components/PageTitle";
 import HisaveAiPage from "./pages/HisaveAiPage";
 import MyCardsPopup from "./components/MyCardsPopup";
 import CardOffersPage from "./pages/CardOffersPage";
-import SearchList from "./components/SearchList";   // ✅ ADD THIS
+import SearchList from "./components/SearchList";   
+import AddCardPage from "./pages/AddCardPage";
 
 const AppContent = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -68,6 +69,7 @@ const AppContent = () => {
             <CardDetails onLoginClick={() => setShowLogin(true)} />
           }
         />
+        <Route path="/add-card" element={<AddCardPage />} />
 
         {/* AI Page */}
         <Route
@@ -115,4 +117,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default App; 

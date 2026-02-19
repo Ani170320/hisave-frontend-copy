@@ -1,50 +1,56 @@
+/* ================= HEADER CONTAINER ================= */
+
 .header-container {
-  background: linear-gradient(
-    135deg,
-    #f8fbff 0%,
-    #eef6ff 100%
-  );
-  padding: 14px 50px;
+  background: linear-gradient(135deg, #f8fbff 0%, #eef6ff 100%);
+  padding: 0 60px;
   position: sticky;
   top: 0;
   z-index: 1000;
-   /* Subtle Shadow */
-  box-shadow: 
+  box-shadow:
     0 4px 10px rgba(0, 0, 0, 0.03),
     0 1px 3px rgba(0, 0, 0, 0.05);
-
-  backdrop-filter: blur(6px);
+  overflow: visible;
 }
 
+/* ================= MAIN HEADER ================= */
+
 .header {
+  height: 78px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-/* LEFT SECTION */
+/* ================= LEFT SECTION ================= */
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 35px;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 }
 
 .header-logo {
-  height: 42px;
-  cursor: pointer;
+  height: 100px;      /* Bigger logo */
+  width: auto;
+  display: block;
 }
 
+/* ================= NAV BUTTONS ================= */
+
 .nav-btn {
-  .nav-btn:hover {
-  background: rgba(0, 119, 182, 0.08);
-}
   border: none;
-  font-size: 14px;
+  font-size: 15px;
   padding: 8px 18px;
   border-radius: 25px;
   cursor: pointer;
-  transition: 0.3s ease;
+  background: transparent;
+  transition: 0.2s ease;
 }
 
 .nav-btn:hover {
@@ -56,7 +62,7 @@
   color: white;
 }
 
-/* CENTER SECTION */
+/* ================= CENTER ================= */
 
 .header-center {
   flex: 1;
@@ -70,14 +76,8 @@
   background: white;
   border-radius: 30px;
   padding: 8px 18px;
-  width: 450px;
+  width: 420px;
   border: 1px solid #e5e7eb;
-  transition: 0.3s ease;
-}
-
-.search-wrapper:focus-within {
-  border-color: #0077b6;
-  box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.1);
 }
 
 .search-icon {
@@ -93,7 +93,7 @@
   font-size: 14px;
 }
 
-/* RIGHT SECTION */
+/* ================= RIGHT SECTION ================= */
 
 .header-right {
   display: flex;
@@ -101,56 +101,64 @@
   gap: 25px;
 }
 
-.cart-section {
+/* ================= GET APP ================= */
+
+.getapp-section {
   display: flex;
   align-items: center;
+  gap: 6px;
   cursor: pointer;
-  position: relative;
   font-size: 14px;
+  color: #0077b6;
+  position: relative;
 }
 
-.cart-icon {
-  height: 20px;
-  margin-right: 6px;
+.android-icon {
+  height: 18px;
 }
 
-.cart-count-badge {
+.getapp-text {
+  white-space: nowrap;
+}
+
+/* DROPDOWN */
+
+.getapp-qr {
   position: absolute;
-  top: -6px;
-  right: 55px;
-  background: #ef4444;
-  color: white;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 50%;
+  top: 38px;
+  right: 0;
+  width: 150px;
+  background: white;
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  z-index: 999;
 }
+
+/* ================= PROFILE BUTTON ================= */
 
 .signup-btn {
   background: linear-gradient(135deg, #0077b6, #0096c7);
   color: white;
   border: none;
-  padding: 8px 22px;
+  padding: 8px 20px;
   border-radius: 30px;
   cursor: pointer;
   font-size: 14px;
-  transition: 0.3s ease;
 }
 
 .signup-btn:hover {
-  transform: translateY(-1px);
   box-shadow: 0 6px 14px rgba(0, 119, 182, 0.25);
 }
 
-/* LOADER */
+/* ================= RESPONSIVE ================= */
 
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+@media (max-width: 1100px) {
+  .search-wrapper {
+    width: 300px;
+  }
+
+  .header-container {
+    padding: 0 30px;
+  }
 }

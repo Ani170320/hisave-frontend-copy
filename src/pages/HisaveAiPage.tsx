@@ -85,7 +85,6 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
     <div className="ai-chat-container">
       <div className="ai-chat">
 
-        {/* HEADER */}
         <div className="ai-mobile-header">
           <button
             className="ai-back-btn"
@@ -118,7 +117,6 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
           </div>
         </div>
 
-        {/* LANDING STATE */}
         {!showChat && (
           <>
             <div className="ai-mobile-title">
@@ -143,7 +141,6 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
           </>
         )}
 
-        {/* CHAT */}
         {showChat && (
           <div className="ai-chat-communication">
             <div className="ai-chat-message-list">
@@ -159,7 +156,77 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
                   {msg.bot && (
                     <div className="ai-chat-system-text-message-block">
                       <div className="ai-chat-system-text-message">
-                        <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+
+                        <ReactMarkdown
+                          rehypePlugins={[rehypeRaw]}
+                          components={{
+                            a: ({ href, children, ...props }) => {
+                              const text = children?.toString().trim();
+
+                              if (
+                                (href && href.toLowerCase().includes("add-card")) ||
+                                text === "Add Card"
+                              ) {
+                                return (
+                                  <span
+                                    onClick={() => onShowMyCards()}
+                                    style={{
+                                      cursor: "pointer",
+                                      color: "#2563eb",
+                                      fontWeight: 600,
+                                      textDecoration: "underline",
+                                    }}
+                                  >
+                                    {children}
+                                  </span>
+                                );
+                              }
+
+                              return (
+                                <a
+                                  {...props}
+                                  href={href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {children}
+                                </a>
+                              );
+                            },
+                            p: ({ children }) => {
+                              const text = children?.toString();
+
+                              if (text && text.includes("Add Card")) {
+                                const parts = text.split("Add Card");
+
+                                return (
+                                  <>
+                                    {parts.map((part, index) => (
+                                      <React.Fragment key={index}>
+                                        {part}
+                                        {index < parts.length - 1 && (
+                                          <span
+                                            onClick={() => onShowMyCards()}
+                                            style={{
+                                              cursor: "pointer",
+                                              color: "#2563eb",
+                                              fontWeight: 600,
+                                              textDecoration: "underline",
+                                            }}
+                                          >
+                                            Add Card
+                                          </span>
+                                        )}
+                                      </React.Fragment>
+                                    ))}
+                                  </>
+                                );
+                              }
+
+                              return <p>{children}</p>;
+                            },
+                          }}
+                        >
                           {cleanMessage(msg.bot)}
                         </ReactMarkdown>
 
@@ -186,7 +253,6 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
           </div>
         )}
 
-        {/* INPUT */}
         <div className="ai-chat-search-panel">
           <div className="ai-chat-searchbar-container">
             <input

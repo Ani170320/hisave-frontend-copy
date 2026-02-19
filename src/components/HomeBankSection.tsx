@@ -111,7 +111,7 @@ const HomeBankSection: React.FC = () => {
           <p className="bank-subtitle">
             <span className="brand-hi">Hi</span>
             <span className="brand-save">SAVE</span>
-            : Pioneering Solution for Consumers & Merchants.
+            : Pioneering Solution for Consumers
           </p>
 
           <h2 className="bank-title">Enjoy Savings</h2>
