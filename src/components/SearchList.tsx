@@ -27,8 +27,9 @@ const SearchList = ({ onBack }) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!searchTerm) return;
-    fetchOffers();
+    if (searchTerm && searchTerm.trim() !== '') {
+      fetchOffers();
+    }
   }, [searchTerm]);
 
   const fetchOffers = async () => {
@@ -57,10 +58,24 @@ const SearchList = ({ onBack }) => {
       };
 
       const search_data = await HomeService.searchOffers(search_payload);
-      setOffers(search_data || []);
+
+      console.log("Search API Response:", search_data);
+
+      // SAFE RESPONSE HANDLING
+      if (Array.isArray(search_data)) {
+        setOffers(search_data);
+      } else if (search_data?.resp) {
+        setOffers(search_data.resp);
+      } else if (search_data?.data) {
+        setOffers(search_data.data);
+      } else {
+        setOffers([]);
+      }
+
     } catch (err) {
       console.error('Error fetching offers:', err);
       setError('Unable to fetch offers.');
+      setOffers([]);
     } finally {
       setLoading(false);
     }
@@ -73,7 +88,6 @@ const SearchList = ({ onBack }) => {
   return (
     <div className="search-container">
 
-      {/* BACK BUTTON */}
       <div
         className="search-back"
         onClick={() => {

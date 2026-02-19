@@ -1,0 +1,149 @@
+/* ================= GLOBAL ================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background: linear-gradient(
+    135deg,
+    #0a1f44 0%,
+    #0f2e6e 40%,
+    #1b4fd8 70%,
+    #3b82f6 100%
+  );
+  min-height: 100vh;
+}
+
+/* ================= LAYOUT ================= */
+
+.policy-layout {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+/* ================= MAIN CARD ================= */
+
+.policy-card {
+  width: 100%;
+  max-width: 1000px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 50px 60px;
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.25),
+    0 10px 25px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.policy-card:hover {
+  transform: translateY(-4px);
+}
+
+/* ================= HEADINGS ================= */
+
+.policy-card h1 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #0f2e6e;
+  margin-bottom: 16px;
+}
+
+.policy-card h2 {
+  font-size: 22px;
+  margin-top: 40px;
+  margin-bottom: 14px;
+  color: #1b4fd8;
+  font-weight: 600;
+}
+
+.policy-card h3 {
+  font-size: 18px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #0a1f44;
+  font-weight: 600;
+}
+
+/* ================= TEXT ================= */
+
+.policy-card p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.policy-card strong {
+  color: #111827;
+}
+
+.policy-card ul {
+  padding-left: 20px;
+  margin-bottom: 16px;
+}
+
+.policy-card li {
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 6px;
+  color: #374151;
+}
+
+/* ================= SECTION ANIMATION ================= */
+
+.fade-section {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.6s ease forwards;
+}
+
+.fade-section:nth-child(1) { animation-delay: 0.1s; }
+.fade-section:nth-child(2) { animation-delay: 0.2s; }
+.fade-section:nth-child(3) { animation-delay: 0.3s; }
+.fade-section:nth-child(4) { animation-delay: 0.4s; }
+.fade-section:nth-child(5) { animation-delay: 0.5s; }
+.fade-section:nth-child(6) { animation-delay: 0.6s; }
+.fade-section:nth-child(7) { animation-delay: 0.7s; }
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================= CONTACT HIGHLIGHT ================= */
+
+#contact {
+  background: linear-gradient(
+    135deg,
+    #e0f2fe,
+    #dbeafe
+  );
+  padding: 20px;
+  border-radius: 16px;
+  margin-top: 40px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .policy-card {
+    padding: 30px 24px;
+  }
+
+  .policy-card h1 {
+    font-size: 26px;
+  }
+
+  .policy-card h2 {
+    font-size: 18px;
+  }
+}

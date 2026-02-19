@@ -3,9 +3,9 @@ import axios, { AxiosInstance } from 'axios';
 
 const apiClient: AxiosInstance = axios.create({
     // baseURL: 'https://jmiazr2sjf.ap-south-1.awsapprunner.com/',
-     //baseURL: 'http://localhost:5000/',
+     baseURL: 'http://localhost:5000/',
     //baseURL: 'https://avi4zzwxh5.ap-south-1.awsapprunner.com/',
-    baseURL: 'https://8966-113-199-230-115.ngrok-free.app',
+    //baseURL: 'https://8966-113-199-230-115.ngrok-free.app',
     headers: {
         'Content-Type': 'application/json',
     },

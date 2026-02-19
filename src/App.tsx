@@ -26,6 +26,10 @@ import MyCardsPopup from "./components/MyCardsPopup";
 import CardOffersPage from "./pages/CardOffersPage";
 import SearchList from "./components/SearchList";   
 import AddCardPage from "./pages/AddCardPage";
+import RefundPolicy from "./pages/RefundPolicy";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
+import AboutUs from "./pages/AboutUs";
 
 const AppContent = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -70,6 +74,10 @@ const AppContent = () => {
           }
         />
         <Route path="/add-card" element={<AddCardPage />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-conditions" element={<TermsConditions />} />
+        <Route path="/about-us" element={<AboutUs />} />
 
         {/* AI Page */}
         <Route

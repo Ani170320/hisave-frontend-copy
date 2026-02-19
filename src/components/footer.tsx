@@ -1,12 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react';
-import '../css/footer.css';
+import React, { useEffect, useState, useRef } from "react";
+import { Link } from "react-router-dom";
+import "../css/footer.css";
 
 const Footer = () => {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const footerRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -29,15 +30,27 @@ const Footer = () => {
   return (
     <footer
       ref={footerRef}
-      className={`hisave-footer ${isIntersecting ? 'footer-animate-in' : 'footer-hidden'}`}
+      className={`hisave-footer ${
+        isIntersecting ? "footer-animate-in" : "footer-hidden"
+      }`}
     >
+      {/* Scroll To Top Button */}
       <button
         className="floating-back-btn"
         onClick={scrollToTop}
         aria-label="Scroll to top"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-          <path d="M18 15l-6-6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+        >
+          <path
+            d="M18 15l-6-6-6 6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </button>
 
@@ -53,7 +66,7 @@ const Footer = () => {
 
           <div className="download-area-clean">
             <div className="qr-box-simple">
-              <img src="/assets/qrcode.png" alt="QR" />
+              <img src="/assets/qrcode.png" alt="QR Code" />
               <p>Scan to App</p>
             </div>
 
@@ -130,46 +143,29 @@ const Footer = () => {
         {/* Column 3: Links */}
         <div className="footer-section links-col">
           <nav className="nav-list-premium">
-            <a
-              href="https://www.gohisave.com/hi-team/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-link-animated"
-            >
+
+            <Link to="/about-us" className="footer-link-animated">
               About Us
-            </a>
+            </Link>
 
-            <a
-              href="https://www.gohisave.com/terms-conditions/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-link-animated"
-            >
+            <Link to="/terms-conditions" className="footer-link-animated">
               Terms & Conditions
-            </a>
+            </Link>
 
-            <a
-              href="https://www.gohisave.com/privacy-policy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-link-animated"
-            >
+            <Link to="/privacy-policy" className="footer-link-animated">
               Privacy Policy
-            </a>
+            </Link>
 
-            <a
-              href="https://www.gohisave.com/refund-policy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-link-animated"
-            >
+            <Link to="/refund-policy" className="footer-link-animated">
               Refund & Cancellation Policy
-            </a>
+            </Link>
+
           </nav>
         </div>
 
       </div>
 
+      {/* Bottom Strip */}
       <div className="footer-bottom-strip">
         <p>
           © {new Date().getFullYear()} mWin Fintech Private Limited. All rights reserved.
