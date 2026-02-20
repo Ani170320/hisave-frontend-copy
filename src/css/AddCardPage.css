@@ -157,3 +157,25 @@ input:focus {
     opacity: 1;
   }
 }
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #1a73e8;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 9999;
+}
+
+.loader {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: #00000090;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+}

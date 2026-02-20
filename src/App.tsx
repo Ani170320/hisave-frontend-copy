@@ -24,12 +24,13 @@ import PageTitleSetter from "./components/PageTitle";
 import HisaveAiPage from "./pages/HisaveAiPage";
 import MyCardsPopup from "./components/MyCardsPopup";
 import CardOffersPage from "./pages/CardOffersPage";
-import SearchList from "./components/SearchList";   
+import SearchList from "./components/SearchList";
 import AddCardPage from "./pages/AddCardPage";
 import RefundPolicy from "./pages/RefundPolicy";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import AboutUs from "./pages/AboutUs";
+import PricingPage from "./pages/PricingPage";
 
 const AppContent = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -38,7 +39,10 @@ const AppContent = () => {
 
   const location = useLocation();
 
-  const hideLayout = location.pathname.startsWith("/hisave-ai");
+  // Hide header & footer for AI and Pricing pages
+  const hideLayout =
+    location.pathname.startsWith("/hisave-ai") ||
+    location.pathname === "/pricing";
 
   return (
     <>
@@ -54,7 +58,7 @@ const AppContent = () => {
         {/* Home */}
         <Route path="/" element={<Home />} />
 
-        {/* 🔥 SEARCH PAGE (IMPORTANT) */}
+        {/* Search */}
         <Route
           path="/search"
           element={<SearchList onBack={() => window.history.back()} />}
@@ -69,11 +73,13 @@ const AppContent = () => {
         {/* Offer Details */}
         <Route
           path="/offer-details/:offerId"
-          element={
-            <CardDetails onLoginClick={() => setShowLogin(true)} />
-          }
+          element={<CardDetails onLoginClick={() => setShowLogin(true)} />}
         />
+
+        {/* Add Card */}
         <Route path="/add-card" element={<AddCardPage />} />
+
+        {/* Static Pages */}
         <Route path="/refund-policy" element={<RefundPolicy />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-conditions" element={<TermsConditions />} />
@@ -88,10 +94,14 @@ const AppContent = () => {
             />
           }
         />
+
+        {/* Pricing Page */}
+        <Route path="/pricing" element={<PricingPage />} />
       </Routes>
 
       {!hideLayout && <Footer />}
 
+      {/* Popups & Modals */}
       <MyCardsPopup
         isOpen={showMyCardsPopup}
         onClose={() => setShowMyCardsPopup(false)}
@@ -125,4 +135,4 @@ const App = () => {
   );
 };
 
-export default App; 
+export default App;

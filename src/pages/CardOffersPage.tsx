@@ -2,50 +2,42 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import HomeService from "../services/HomeService";
 import { useAuth } from "../context/AuthContext";
-import { useUserCards } from "../context/UserCardContext";
 import "../css/CardOffersPage.css";
 
 const CardOffersPage: React.FC = () => {
   const { cardType } = useParams();
   const navigate = useNavigate();
   const { uid } = useAuth();
-  const { userCards } = useUserCards(); // 🔥 get saved cards
 
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!cardType || !uid) return;
-    fetchOffers();
-  }, [cardType, uid, userCards]);
+    if (cardType && uid) {
+      fetchOffers();
+    }
+  }, [cardType, uid]);
 
   const fetchOffers = async () => {
     try {
       setLoading(true);
 
-      // 🔥 Find matching card from saved cards
-      const matchedCard = userCards?.find(
-        (card: any) =>
-          card.network?.toLowerCase() === cardType?.toLowerCase()
-      );
-
       const payload = {
-        paymentMethod: {
-          pmtType: matchedCard?.pmtType || "debit card",
-          network: cardType?.toLowerCase(),
-          cardName: matchedCard?.cardName || "",
-          bankName: matchedCard?.bankName || "",
-          walletType: null,
-          upiType: null,
-        },
+        searchPhrase: cardType,   // IMPORTANT
+        banks: [],
+        cardNetworks: [],
+        lat: 19.08201,
+        long: 72.8344683,
         uid: uid,
+        user_country: "India"
       };
 
-      console.log("AUTO DETECTED PAYLOAD:", payload);
+      console.log("🔥 Category Payload:", payload);
 
       const result = await HomeService.searchOffers(payload);
 
       setOffers(Array.isArray(result) ? result : []);
+
     } catch (error) {
       console.error("Error fetching offers:", error);
       setOffers([]);
@@ -74,11 +66,11 @@ const CardOffersPage: React.FC = () => {
         </div>
       ) : offers.length === 0 ? (
         <p className="no-offers">
-          No {cardType} offers available
+          No {cardType?.toUpperCase()} offers available
         </p>
       ) : (
         <div className="offers-grid">
-          {offers.map((offer) => (
+          {offers.map((offer: any) => (
             <div
               key={offer.offerId}
               className="offer-card"

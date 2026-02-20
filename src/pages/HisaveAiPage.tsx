@@ -37,6 +37,9 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
   const [input, setInput] = useState("");
   const [showChat, setShowChat] = useState(false);
 
+  // ✅ FREE CREDITS
+  const [credits, setCredits] = useState(3);
+
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
@@ -44,6 +47,14 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
   const handleSend = (text?: string) => {
     const messageText = text ?? input;
     if (!messageText.trim()) return;
+
+    // ✅ Redirect to pricing if credits finished
+    if (credits <= 0) {
+      navigate("/pricing");
+      return;
+    }
+
+    setCredits((prev) => prev - 1);
 
     setShowChat(true);
     sendMessage(messageText);
@@ -86,16 +97,27 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
       <div className="ai-chat">
 
         <div className="ai-mobile-header">
-          <button
-            className="ai-back-btn"
-            onClick={() => navigate(-1)}
-          >
-            ←
-          </button>
+        <button
+  className="ai-back-btn"
+  onClick={() => {
+    if (showChat) {
+      setShowChat(false);
+    } else {  
+      navigate(-1);
+    }
+  }}
+>
+  ←
+</button>
 
           <div className="ai-brand">
             <img src={logo} alt="HiSAVE" className="ai-logo" />
             <span className="ai-title"></span>
+          </div>
+
+          {/* ✅ Credits Badge */}
+          <div className="ai-credit-badge">
+            {credits} Free Credits
           </div>
 
           <div className="ai-header-icons">
@@ -137,6 +159,18 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
                   <span>{item.label}</span>
                 </div>
               ))}
+            </div>
+
+            {/* ✅ Plans Section */}
+            <div className="ai-plans-section">
+              <h3>Upgrade Your Experience</h3>
+              <p>Unlock more AI searches and premium savings.</p>
+              <button
+                className="ai-view-plans-btn"
+                onClick={() => navigate("/pricing")}
+              >
+                View Plans
+              </button>
             </div>
           </>
         )}
@@ -261,12 +295,13 @@ const HisaveAiPage: React.FC<Props> = ({ onShowMyCards }) => {
               placeholder="Ask HiSAVE anything..."
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
+              disabled={credits <= 0}
             />
 
             <button
               className="ai-chat-search-button"
               onClick={() => handleSend()}
-              disabled={!input.trim() || loading}
+              disabled={!input.trim() || loading || credits <= 0}
             >
               <img src={sendIcon} alt="Send" />
             </button>

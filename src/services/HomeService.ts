@@ -3,9 +3,9 @@ import axios, { AxiosInstance } from 'axios';
 
 const apiClient: AxiosInstance = axios.create({
     // baseURL: 'https://jmiazr2sjf.ap-south-1.awsapprunner.com/',
-     baseURL: 'http://localhost:5000/',
+     //baseURL: 'http://localhost:5000/',
     //baseURL: 'https://avi4zzwxh5.ap-south-1.awsapprunner.com/',
-    //baseURL: 'https://8966-113-199-230-115.ngrok-free.app',
+    baseURL: 'https://8966-113-199-230-115.ngrok-free.app',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -217,13 +217,79 @@ const HomeService = {
   searchOffers: async (params: Record<string, unknown> = {}) => {
     try {
       const response = await apiClient.post('searchOffers', params);      
+      
       return response.data.matching_offers;
 
     } catch (error) {
       console.error('Error in getData:', error);
+      
+      throw error;
+    }
+    
+  },
+    getCardNetworkOffers: async (
+    uid: string,
+    network: string
+  ) => {
+    try {
+      const payload = {
+        paymentMethod: {
+          pmtType: "debit card",
+          network: network?.toLowerCase(),
+          cardName: "John Doe",
+          bankName: "ABC Bank",
+          walletType: null,
+          upiType: null
+        },
+        uid: uid
+      };
+
+      console.log("🔥 Sending Payload:", payload);
+
+      const response = await apiClient.post(
+        "retriveHSBOffers",   // change endpoint if different
+        payload
+      );
+
+      return response.data.offers;
+    } catch (error) {
+      console.error("Error fetching network offers:", error);
       throw error;
     }
   },
+
+  /* ================= PAYMENT METHODS ================= */
+
+  addPaymentMethod: async (params: Record<string, unknown> = {}) => {
+    try {
+      const response = await apiClient.post('addPaymentMethod', params);
+      return response.data;
+    } catch (error) {
+      console.error('Error in addPaymentMethod:', error);
+      throw error;
+    }
+  },
+
+  getPaymentMethod: async (params: Record<string, unknown> = {}) => {
+    try {
+      const response = await apiClient.post('getPaymentMethod', params);
+      return response.data.payment_methods;
+    } catch (error) {
+      console.error('Error in getPaymentMethod:', error);
+      throw error;
+    }
+  },
+
+  deletePaymentMethod: async (params: Record<string, unknown> = {}) => {
+    try {
+      const response = await apiClient.post('deletePaymentMethod', params);
+      return response.data;
+    } catch (error) {
+      console.error('Error in deletePaymentMethod:', error);
+      throw error;
+    }
+  },
+
 };
 
 export default HomeService;

@@ -1,68 +1,120 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/AddCardPage.css";
-import { useUserCards } from "../context/UserCardContext";
 import { useAi } from "../ai/context/AiContext";
+import { useAuth } from "../context/AuthContext";
+import HomeService from "../services/HomeService";
+
+
+interface PaymentMethod {
+  id: string;
+  paymentMethod: {
+    pmtType: string;
+    network: string;
+    cardName: string;
+    bankName: string;
+  };
+}
 
 const AddCardPage: React.FC = () => {
   const navigate = useNavigate();
-
-  const { addCard, cards } = useUserCards();
   const { sendMessage } = useAi();
+  const { user } = useAuth();
+  const uid = user?.uid;
 
   const [activeTab, setActiveTab] = useState<"cards" | "add">("add");
   const [cardType, setCardType] = useState("credit");
   const [network, setNetwork] = useState("");
   const [bankName, setBankName] = useState("");
   const [cardName, setCardName] = useState("");
+  const [cards, setCards] = useState<PaymentMethod[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const networks = [
-    { name: "Mastercard", img: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" },
-    { name: "Visa", img: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" },
-    { name: "RuPay", img: "https://upload.wikimedia.org/wikipedia/commons/5/51/RuPay.svg" },
-    { name: "Amex", img: "https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo.svg" }
-  ];
+  useEffect(() => {
+    if (uid) {
+      fetchCards();
+    }
+  }, [uid]);
 
-  /* ✅ SIMPLE & CORRECT CANCEL LOGIC */
-  const handleCancel = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate("/");
+  const fetchCards = async () => {
+    if (!uid) return;
+
+    try {
+      const response = await HomeService.getPaymentMethod({ uid });
+      setCards(response || []);
+    } catch (error) {
+      console.log("Fetch error:", error);
     }
   };
 
-  const handleAddCard = () => {
-    if (!bankName || !cardName || !network) {
-      alert("Please fill all fields");
+  const handleAddCard = async () => {
+    if (!uid) {
+      alert("User not logged in");
       return;
     }
 
-    const newCard = {
-      bankName,
-      cardName,
-      cardType,
-      network,
+    if (!bankName || !cardName || !network) {
+      alert("Fill all fields");
+      return;
+    }
+
+    const payload = {
+      uid: uid,
+      paymentMethod: {
+        pmtType: cardType,
+        network: network,
+        cardName: cardName,
+        bankName: bankName,
+        walletType: null,
+        upiType: null,
+      }
     };
 
-    addCard(newCard);
+    try {
+      setLoading(true);
 
-    const paymentMethods = JSON.stringify([...cards, newCard]);
-    sendMessage("Show offers for my cards", paymentMethods);
+      await HomeService.addPaymentMethod(payload);
 
-    sessionStorage.setItem("openMyCardsPopup", "true");
+      const updatedCards = await HomeService.getPaymentMethod({ uid });
+      setCards(updatedCards);
 
-    navigate("/hisave-ai");
+      // Format cards for AI
+      const formattedCards = updatedCards.map(card => ({
+        bankName: card.paymentMethod.bankName,
+        network: card.paymentMethod.network,
+        pmtType: card.paymentMethod.pmtType
+      }));
+
+      // Send to AI (backend already handles logic)
+      sendMessage(
+        "Show best offers on flights and restaurants using my cards",
+        JSON.stringify(formattedCards)
+      );
+
+      navigate("/hisave-ai");
+
+    } catch (error) {
+      console.log("Add error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteCard = async (id: string) => {
+    if (!uid) return;
+
+    try {
+      await HomeService.deletePaymentMethod({ id, uid });
+      await fetchCards();
+    } catch (error) {
+      console.log("Delete error:", error);
+    }
   };
 
   return (
     <div className="addcard-overlay">
       <div className="addcard-modal">
-
-        <div className="addcard-header">
-          <h2>My Cards</h2>
-          <span className="close-btn" onClick={handleCancel}>×</span>
-        </div>
+        <h2>My Cards</h2>
 
         <div className="addcard-tabs">
           <div
@@ -82,15 +134,20 @@ const AddCardPage: React.FC = () => {
 
         {activeTab === "cards" && (
           <div className="cards-row">
-            {cards.map((card, index) => (
-              <div key={index} className="card-box">
+            {cards.map((card) => (
+              <div key={card.id} className="card-box">
                 <div className="card-top">
-                  <span>{card.network}</span>
-                  <span className="show-offer">Show Offer</span>
+                  <span>{card.paymentMethod.network}</span>
+                  <span
+                    style={{ cursor: "pointer", color: "red" }}
+                    onClick={() => handleDeleteCard(card.id)}
+                  >
+                    Delete
+                  </span>
                 </div>
                 <div className="card-bottom">
-                  <span>{card.cardName}</span>
-                  <span>{card.cardType} card</span>
+                  <span>{card.paymentMethod.cardName}</span>
+                  <span>{card.paymentMethod.pmtType} card</span>
                 </div>
               </div>
             ))}
@@ -99,68 +156,41 @@ const AddCardPage: React.FC = () => {
 
         {activeTab === "add" && (
           <>
-            <div className="form-group">
-              <label>Bank Name</label>
-              <select
-                value={bankName}
-                onChange={(e) => setBankName(e.target.value)}
-              >
-                <option value="">e.g. HDFC</option>
-                <option>HDFC Bank</option>
-                <option>ICICI Bank</option>
-                <option>SBI</option>
-              </select>
-            </div>
+            <select
+              value={bankName}
+              onChange={(e) => setBankName(e.target.value)}
+            >
+              <option value="">Select Bank</option>
+              <option>HDFC Bank</option>
+              <option>ICICI Bank</option>
+              <option>SBI</option>
+            </select>
 
-            <div className="form-group">
-              <label>Card Type</label>
-              <div className="card-type-toggle">
-                <div
-                  className={cardType === "credit" ? "type-btn active" : "type-btn"}
-                  onClick={() => setCardType("credit")}
-                >
-                  Credit Card
-                </div>
-                <div
-                  className={cardType === "debit" ? "type-btn active" : "type-btn"}
-                  onClick={() => setCardType("debit")}
-                >
-                  Debit Card
-                </div>
-              </div>
-            </div>
+            <input
+              placeholder="Card Name"
+              value={cardName}
+              onChange={(e) => setCardName(e.target.value)}
+            />
 
-            <div className="form-group">
-              <label>Card Name</label>
-              <input
-                type="text"
-                placeholder="e.g. HDFC Moneyback+"
-                value={cardName}
-                onChange={(e) => setCardName(e.target.value)}
-              />
-            </div>
+            <input
+              placeholder="Network"
+              value={network}
+              onChange={(e) => setNetwork(e.target.value)}
+            />
 
-            <div className="form-group">
-              <label>Network</label>
-              <div className="network-row">
-                {networks.map((item) => (
-                  <div
-                    key={item.name}
-                    className={network === item.name ? "network active" : "network"}
-                    onClick={() => setNetwork(item.name)}
-                  >
-                    <img src={item.img} alt={item.name} />
-                  </div>
-                ))}
-              </div>
-            </div>
+            <select
+              value={cardType}
+              onChange={(e) => setCardType(e.target.value)}
+            >
+              <option value="credit">Credit</option>
+              <option value="debit">Debit</option>
+            </select>
 
-            <button className="addcard-button" onClick={handleAddCard}>
-              Add Card
+            <button onClick={handleAddCard}>
+              {loading ? "Adding..." : "Add Card"}
             </button>
           </>
         )}
-
       </div>
     </div>
   );

@@ -315,3 +315,31 @@ body {
     min-width: 200px;
   }
 }
+.ai-credit-badge {
+  background: linear-gradient(135deg, #2563eb, #1e3a8a);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 10px;
+}
+
+.ai-plans-section {
+  margin-top: 40px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.1);
+}
+
+.ai-view-plans-btn {
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
