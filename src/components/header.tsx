@@ -69,6 +69,13 @@ const Header = ({ onLoginClick, onProfileClick, onMyCardsClick }) => {
         {/* RIGHT */}
         <div className="header-right">
 
+          <button
+            className={`ai-nav-btn ${location.pathname.startsWith('/hisave-ai') ? 'active' : ''}`}
+            onClick={() => navigate('/hisave-ai')}
+          >
+            <span className="ai-sparkle">✨</span> HiSave AI
+          </button>
+
           <div
             className="getapp-section"
             onClick={() => setShowAppQR(!showAppQR)}

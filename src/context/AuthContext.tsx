@@ -1,17 +1,35 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-const AuthContext = createContext(null);
+interface AuthContextType {
+  uid: string | null;
+  setUID: (uid: string | null) => void;
+  user: any;
+  setUser: (user: any) => void;
+}
 
-export const AuthProvider = ({ children }) => {
-  const [uid, setUID] = useState(null);
-  const [user, setUser] = useState([])
-  // Load uid from localStorage on app start
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [uid, setUID] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+
+  // Load user data from localStorage on app start
   useEffect(() => {
     const storedUid = localStorage.getItem('uid');
-    const userData = localStorage.getItem('user')
+    const userDataStr = localStorage.getItem('user');
+
     if (storedUid) {
       setUID(storedUid);
-      setUser(userData);
+      try {
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          setUser(userData);
+          console.log("🔐 AuthContext: Restored user session:", userData);
+        }
+      } catch (e) {
+        console.error("AuthContext: Failed to parse user data", e);
+        setUser(userDataStr); // Fallback to raw string
+      }
     }
   }, []);
 

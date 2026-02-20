@@ -1,181 +1,476 @@
-.addcard-overlay {
+/* ─────────────────────────────────────────
+   Add Card Page
+───────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.ac-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #eef6ff, #dbeafe);
+  padding: 40px 20px 60px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Toast */
+.ac-toast {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.45);
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  animation: slideIn 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ac-toast.success {
+  background: #16a34a;
+}
+
+.ac-toast.error {
+  background: #dc2626;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Container */
+.ac-container {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* Header */
+.ac-header {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
-.addcard-modal {
-  width: 500px;
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 28px;
-  box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.15);
-  animation: popup 0.2s ease-in-out;
-  font-family: "Inter", sans-serif;
+.ac-back {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 0;
+  white-space: nowrap;
+  margin-top: 4px;
 }
 
-.addcard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.ac-back:hover {
+  color: #1d4ed8;
 }
 
-.addcard-header h2 {
-  font-size: 20px;
-  font-weight: 600;
+.ac-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0 0 4px;
+}
+
+.ac-subtitle {
+  font-size: 14px;
+  color: #64748b;
   margin: 0;
 }
 
-.close-btn {
-  font-size: 22px;
-  cursor: pointer;
-}
-
-.addcard-tabs {
+/* Tabs */
+.ac-tabs {
   display: flex;
   gap: 10px;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 28px;
 }
 
-.tab {
-  padding: 8px 16px;
-  background: #f3f4f6;
-  border-radius: 8px;
+.ac-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
   font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.tab.active {
-  background: #2a5bd7;
-  color: #ffffff;
+.ac-tab:hover {
+  border-color: #2563eb;
+  color: #2563eb;
 }
 
-.form-group {
+.ac-tab.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.ac-badge {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: 12px;
+}
+
+.ac-tab:not(.active) .ac-badge {
+  background: #2563eb15;
+  color: #2563eb;
+}
+
+/* ── CARDS GRID ── */
+.ac-cards-section {
+  animation: fadeUp 0.25s ease;
+}
+
+.ac-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.ac-card-item {
+  border-radius: 18px;
+  padding: 22px;
+  position: relative;
+  color: white;
+  box-shadow: 0 8px 28px rgba(37, 99, 235, 0.2);
+  transition: transform 0.2s;
+  overflow: hidden;
+  min-height: 180px;
+}
+
+.ac-card-item:hover {
+  transform: translateY(-4px);
+}
+
+.ac-chip {
+  width: 38px;
+  height: 28px;
+  background: linear-gradient(135deg, #ffd700, #ffa500);
+  border-radius: 5px;
+  margin-bottom: 16px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ac-card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.ac-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 18px;
 }
 
-.form-group label {
+.ac-card-bank {
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.ac-network-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  letter-spacing: 0.5px;
+}
+
+.ac-card-number {
+  font-size: 18px;
+  letter-spacing: 3px;
+  margin-bottom: 18px;
+  opacity: 0.8;
+}
+
+.ac-card-bottom {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ac-card-label {
+  font-size: 10px;
+  opacity: 0.65;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 2px;
+}
+
+.ac-card-value {
   font-size: 13px;
-  font-weight: 500;
-  display: block;
-  margin-bottom: 6px;
+  font-weight: 600;
 }
 
-select,
-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
+.ac-delete-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.ac-delete-btn:hover {
+  background: rgba(220, 38, 38, 0.6);
+}
+
+.ac-delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Empty state */
+.ac-empty {
+  text-align: center;
+  padding: 60px 40px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.08);
+}
+
+.ac-empty-icon {
+  font-size: 52px;
+  margin-bottom: 16px;
+}
+
+.ac-empty h3 {
+  font-size: 20px;
+  color: #1e3a8a;
+  margin: 0 0 8px;
+}
+
+.ac-empty p {
   font-size: 14px;
-  outline: none;
+  color: #64748b;
+  margin: 0 0 24px;
 }
 
-select:focus,
-input:focus {
-  border-color: #2a5bd7;
+.ac-add-first-btn {
+  padding: 12px 28px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.card-type-toggle {
+/* Loading */
+.ac-loading {
+  text-align: center;
+  padding: 60px;
+  color: #64748b;
+}
+
+/* ── ADD FORM ── */
+.ac-add-section {
+  animation: fadeUp 0.25s ease;
+}
+
+.ac-form-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 8px 28px rgba(37, 99, 235, 0.1);
+  max-width: 560px;
+}
+
+.ac-field {
+  margin-bottom: 22px;
+}
+
+.ac-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ac-type-toggle {
   display: flex;
   gap: 12px;
 }
 
-.type-btn {
+.ac-type-btn {
   flex: 1;
   padding: 12px;
+  border: 1.5px solid #e2e8f0;
   border-radius: 10px;
-  background: #f3f4f6;
-  text-align: center;
-  cursor: pointer;
-}
-
-.type-btn.active {
-  background: #2a5bd7;
-  color: white;
+  background: #f8fafc;
+  font-size: 14px;
   font-weight: 500;
-}
-
-.network-row {
-  display: flex;
-  gap: 14px;
-}
-
-.network {
-  flex: 1;
-  height: 60px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #fafafa;
+  color: #64748b;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s;
 }
 
-.network img {
-  height: 26px;
+.ac-type-btn.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
 }
 
-.network.active {
-  border-color: #2a5bd7;
-  box-shadow: 0 0 0 2px rgba(42, 91, 215, 0.15);
-}
-
-.addcard-button {
+.ac-select,
+.ac-input {
   width: 100%;
-  margin-top: 22px;
+  padding: 12px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #1e293b;
+  outline: none;
+  background: #fff;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+.ac-select:focus,
+.ac-input:focus {
+  border-color: #2563eb;
+}
+
+.ac-network-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ac-network-btn {
+  padding: 9px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ac-network-btn:hover {
+  border-color: #2563eb;
+}
+
+.ac-network-btn.active {
+  background: #eff6ff;
+  font-weight: 600;
+}
+
+.ac-submit-btn {
+  width: 100%;
   padding: 14px;
   border-radius: 12px;
   border: none;
-  font-size: 15px;
-  font-weight: 500;
-  background: linear-gradient(90deg, #6b8dfb, #4e73df);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: white;
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+  transition: transform 0.2s;
 }
 
-.addcard-button:hover {
-  opacity: 0.9;
+.ac-submit-btn:hover:not(.disabled) {
+  transform: translateY(-2px);
 }
 
-@keyframes popup {
-  from {
-    transform: scale(0.95);
-    opacity: 0;
-  }
+.ac-submit-btn.disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ac-privacy-note {
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: center;
+  margin-top: 14px;
+}
+
+/* Spinner */
+.ac-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(37, 99, 235, 0.2);
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.ac-spinner.white {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+}
+
+@keyframes spin {
   to {
-    transform: scale(1);
-    opacity: 1;
+    transform: rotate(360deg);
   }
 }
-.toast {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #1a73e8;
-  color: white;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  z-index: 9999;
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.loader {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  background: #00000090;
-  color: white;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 13px;
+/* Responsive */
+@media (max-width: 600px) {
+  .ac-form-card {
+    padding: 20px;
+  }
+
+  .ac-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ac-type-toggle {
+    flex-direction: column;
+  }
 }

@@ -31,6 +31,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import AboutUs from "./pages/AboutUs";
 import PricingPage from "./pages/PricingPage";
+import CheckoutPage from "./pages/CheckoutPage";
 
 const AppContent = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -42,7 +43,8 @@ const AppContent = () => {
   // Hide header & footer for AI and Pricing pages
   const hideLayout =
     location.pathname.startsWith("/hisave-ai") ||
-    location.pathname === "/pricing";
+    location.pathname === "/pricing" ||
+    location.pathname === "/checkout";
 
   return (
     <>
@@ -97,6 +99,9 @@ const AppContent = () => {
 
         {/* Pricing Page */}
         <Route path="/pricing" element={<PricingPage />} />
+
+        {/* Checkout Page */}
+        <Route path="/checkout" element={<CheckoutPage />} />
       </Routes>
 
       {!hideLayout && <Footer />}
