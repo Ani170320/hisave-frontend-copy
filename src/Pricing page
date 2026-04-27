@@ -1,0 +1,253 @@
+  import React from "react";
+  import { useNavigate } from "react-router-dom";
+  import { FaArrowLeft } from "react-icons/fa";
+  import "../css/PricingPage.css";
+  import { useAuth } from "../context/AuthContext";
+  import HomeService from "../services/HomeService";
+  import { toast } from 'react-toastify';
+
+
+  const PricingPage: React.FC = () => {
+
+    const navigate = useNavigate();
+    const { uid, user } = useAuth();
+
+    console.log("uid", uid);
+
+    const startPayment = async (amount: number, planName: string, numMonthly: number, numYearly: number) => {
+
+      try {
+        localStorage.removeItem("payment_reference");
+        localStorage.removeItem("last_plan_name");
+        localStorage.removeItem("last_plan_amount");
+
+        // Clear any stale payment session storage from previous attempts
+        Object.keys(sessionStorage).forEach(key => {
+          if (key.startsWith('payment_status_')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+
+        if (!uid) {
+          toast.error("❌ Please login to proceed.");
+          return;
+        }
+
+
+        // 1. Insert Pending Subscription
+        const subRes = await HomeService.insertB2cSubscription({
+          uid: uid,
+          subscription_amt: amount,
+          num_searches_month: numMonthly,
+          num_searches_year: numYearly
+        });
+
+        const subscr_id = subRes.subscr_id;
+        if (!subscr_id) {
+          toast.error("❌ Could not initialize subscription. Please try again.");
+          return;
+        }
+
+
+        // 2. Create Decentro Payment Link
+        // Convention: reference_id must be at least 5 chars for Decentro.
+
+        const reference_id = `hisave_${subscr_id}`;
+
+        // Fetch fresh user data to ensure customer details are correct for Decentro
+        const freshUser = await HomeService.getUser({ uid });
+
+        const body = {
+          expiry_time: 2,
+          amount: amount,
+          purpose_message: "HiSAVE subscription",
+          mobileNumber: freshUser?.phone_number || freshUser?.phone || freshUser?.mobile || freshUser?.mobileNumber || freshUser?.mobile_number || freshUser?.phoneNumber || user?.phone_number || user?.phone || user?.mobile || user?.mobileNumber || user?.mobile_number || user?.phoneNumber || "",
+          customer_email: freshUser?.email || user?.email || "",
+          customer_mobile: freshUser?.phone_number || freshUser?.phone || freshUser?.mobile || freshUser?.mobileNumber || freshUser?.mobile_number || freshUser?.phoneNumber || user?.phone_number || user?.phone || user?.mobile || user?.mobileNumber || user?.mobile_number || user?.phoneNumber || "",
+          customer_name: freshUser?.name || freshUser?.user_name || user?.name || "",
+          reference_id: reference_id,
+          uid: uid,
+          redirect_url: `${window.location.origin}/payment-status?reference_id=${reference_id}&t=${Date.now()}`
+        };
+
+        const data = await HomeService.createDecentroPaymentLink(body);
+
+        console.log("Payment response:", data);
+
+        const redirectUrl =
+          data?.redirect_url ||
+          data?.decentro_response?.data?.upi_uris?.common_uri;
+
+        if (redirectUrl) {
+          localStorage.setItem("payment_reference", reference_id);
+          localStorage.setItem("last_plan_name", planName);
+          localStorage.setItem("last_plan_amount", amount.toString());
+
+          window.location.href = redirectUrl;
+        } else {
+          toast.error("❌ Could not start payment. Please try again.");
+        }
+
+
+      } catch (error) {
+        console.error("Payment error:", error);
+        toast.error("❌ Payment failed to start.");
+      }
+    };
+
+    const plans = [
+      {
+
+        name: "Monthly Plan (Starter)",
+        price: "₹129",
+        amount: 129,
+        duration: "per month",
+        numMonthly: 15,
+        numYearly: 0,
+        features: [
+          "15 AI powered card offer per month",
+          "Costs just ₹8.60 per AI check",
+          "Unlock Maximum Discounts Instantly",
+          "Instantly Uncover Hidden Card based Offers"
+        ],
+        description:
+          "At just ₹129 per month, it is the perfect risk-free way to test the waters.",
+        best: false
+      },
+      {
+        name: "Quarterly Plan (Standard)",
+        price: "₹299",
+        amount: 299,
+        duration: "per quarter",
+        numMonthly: 45,
+        numYearly: 0,
+        features: [
+          "45 AI powered card offer per quarter",
+          "Reduced cost of ₹6.64 per AI check",
+          "Over 20% savings vs monthly"
+        ],
+        description:
+          "At just ₹99 per month equivalent, it offers consistent value for regular shoppers.",
+        best: false
+      },
+      {
+        name: "Annual Plan (Premium)",
+        price: "₹599",
+        amount: 599,
+        duration: "per year",
+        numMonthly: 0,
+        numYearly: 180,
+        features: [
+          "180 AI powered card offer per year",
+          "Lowest cost at just ₹3.33 per AI check",
+          "Lowest cost per check",
+          "Nearly 60% savings vs monthly"
+        ],
+        description:
+          "At just ₹49 per month equivalent, it offers the maximum value.",
+        best: true
+      }
+    ];
+
+    return (
+      <div className="pricing-container">
+
+        <div className="back-header" onClick={() => navigate(-1)}>
+          <button className="back-button">
+            <FaArrowLeft />
+          </button>
+        </div>
+
+
+
+        <div className="pricing-header">
+
+          <img
+            src="/assets/hisave_logo.png"
+            alt="HiSAVE"
+            className="pricing-logo"
+            onClick={() => navigate("/")}
+          />
+
+          <h1 className="pricing-title"><span className="brand-orange">Hi</span><span className="brand-blue">SAVE</span> Premium</h1>
+
+          <h2 className="pricing-subtitle">
+            Unlock Exclusive Card-Based Offers from RuPay, Visa, and Mastercard in Seconds
+          </h2>
+
+          <p className="pricing-subtitle">
+            AI Powered Smart Savings
+          </p>
+
+          <div className="card-logos">
+            <img src="/assets/Rupay_Logo.png" alt="rupay" />
+            <img src="/assets/Visa_Logo.png" alt="visa" />
+            <img src="/assets/Mastercard_Logo.png" alt="mastercard" />
+          </div>
+
+          <div className="pricing-description">
+            <p className="pricing-footer-text">
+              Make smarter spending decisions every time you shop.
+            </p>
+          </div>
+
+        </div>
+
+        <div className="pricing-grid">
+
+          {plans.map((plan, index) => (
+            <div
+              key={index}
+              className={`pricing-card ${plan.best ? "best-plan" : ""}`}
+            >
+
+              {plan.best && (
+                <div className="best-badge">Best Value</div>
+              )}
+
+              <div className="card-header">
+                <h2 className="plan-name">{plan.name}</h2>
+                <div className="plan-price-container">
+                  <div className="plan-price">{plan.price}</div>
+                  <div className="gst-text">(incl. 18%GST)</div>
+                </div>
+                <div className="plan-duration">{plan.duration}</div>
+              </div>
+
+              <div className="card-features">
+
+                <ul className="feature-points">
+                  {plan.features.map((feature, i) => {
+                    const isHighlight = feature.includes("savings") || feature.includes("Lowest") || feature.includes("Maximum");
+                    return (
+                      <li key={i} className={isHighlight ? "highlight-feature" : ""}>
+                        <span className="check-icon">✔</span> {feature}
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                <p className="plan-desc">{plan.description}</p>
+
+              </div>
+
+              <button
+                className="plan-btn"
+                onClick={() => startPayment(plan.amount, plan.name, plan.numMonthly, plan.numYearly)}
+
+              >
+                Choose Plan
+              </button>
+
+            </div>
+          ))}
+
+        </div>
+
+      </div>
+    );
+  };
+
+  export default PricingPage;
+
+
