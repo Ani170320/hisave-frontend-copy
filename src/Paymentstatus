@@ -1,0 +1,252 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  FaCheckCircle,
+  FaTimesCircle,
+  FaExclamationCircle,
+  FaSpinner,
+  FaRegCalendarAlt,
+  FaReceipt,
+  FaArrowLeft
+} from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
+import HomeService from "../services/HomeService";
+import "../css/PaymentStatus.css";
+
+
+const PaymentStatus: React.FC = () => {
+  const navigate = useNavigate();
+  const { uid, setUser } = useAuth();
+
+  const [planName] = useState(localStorage.getItem("last_plan_name") || "Premium Subscription");
+  const [planAmount] = useState(localStorage.getItem("last_plan_amount") || "0");
+  const query = new URLSearchParams(useLocation().search);
+  const urlReferenceId = query.get("reference_id");
+  const [txnReference] = useState(urlReferenceId || "---");
+
+  const storageKey = `payment_status_${txnReference}`;
+
+  // Try to recover state from sessionStorage to prevent "Processing" flicker on refresh
+  const getInitialState = () => {
+    const saved = sessionStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const initialState = getInitialState();
+  const [status, setStatus] = useState(initialState?.status || "Processing Payment...");
+  const [statusType, setStatusType] = useState<"pending" | "success" | "error" | "warning">(initialState?.type || "pending");
+
+  useEffect(() => {
+    if (!txnReference || txnReference === "---") return;
+
+    // If we already have a final status in this session, don't poll again
+    if (statusType !== "pending") return;
+
+    let isMounted = true;
+    let count = 0;
+    const MAX_RETRIES = 20;
+
+    const pollStatus = async () => {
+      try {
+        console.log(`Polling check #${count + 1} for ID:`, txnReference);
+        const response = await HomeService.getDecentroTxnStatus(txnReference);
+
+        // Handle both response formats (direct or nested)
+        const paymentStatus = (response.payment_status || response.status || "").toUpperCase();
+
+        if (paymentStatus === "SUCCESS") {
+          if (isMounted) {
+            const finalStatus = "Success! Welcome to HiSAVE Premium 🎉";
+            setStatus(finalStatus);
+            setStatusType("success");
+
+            // Persist to session so refresh doesn't restart polling
+            sessionStorage.setItem(storageKey, JSON.stringify({ status: finalStatus, type: "success" }));
+
+            if (uid) {
+              await HomeService.getUser({ uid })
+                .then(u => { if (u && isMounted) setUser(u); })
+                .catch(e => console.error("User refresh failed", e));
+            }
+            return true; // Stop
+          }
+        } else if (paymentStatus === "FAILED" || paymentStatus === "FAILURE") {
+          if (isMounted) {
+            const finalStatus = "Payment Unsuccessful ❌";
+            setStatus(finalStatus);
+            setStatusType("error");
+            sessionStorage.setItem(storageKey, JSON.stringify({ status: finalStatus, type: "error" }));
+          }
+          return true; // Stop
+        } else if (paymentStatus === "EXPIRED") {
+          if (isMounted) {
+            const finalStatus = "Payment Session Expired";
+            setStatus(finalStatus);
+            setStatusType("warning");
+            sessionStorage.setItem(storageKey, JSON.stringify({ status: finalStatus, type: "warning" }));
+          }
+          return true; // Stop
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+
+      count++;
+      if (count >= MAX_RETRIES) {
+        if (isMounted) {
+          const finalStatus = "Still processing. Please check your bank app.";
+          setStatus(finalStatus);
+          setStatusType("warning");
+          // Don't persist warning as it might still succeed later
+        }
+        return true; // Stop
+      }
+
+      return false; // Continue
+    };
+
+    // First check immediately
+    pollStatus();
+
+    // Setup stable interval
+    const intervalId = setInterval(async () => {
+      const shouldStop = await pollStatus();
+      if (shouldStop) {
+        clearInterval(intervalId);
+      }
+    }, 3000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [txnReference, uid, setUser, statusType, storageKey]);
+
+  const renderStatusIcon = () => {
+    switch (statusType) {
+      case "success":
+        return <FaCheckCircle className="status-hero-icon success-icon" />;
+      case "error":
+        return <FaTimesCircle className="status-hero-icon error-icon" />;
+      case "warning":
+        return <FaExclamationCircle className="status-hero-icon warning-icon" />;
+      case "pending":
+      default:
+        return <FaSpinner className="status-hero-icon pending-icon-spinner" />;
+    }
+  };
+
+  const getStatusClass = () => {
+    return `status-card-container ${statusType}`;
+  };
+
+  const today = new Date().toLocaleDateString("en-IN", {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  return (
+    <div className={`status-page-wrapper ${statusType}`}>
+      <div className="status-glass-background"></div>
+
+      <div className="status-content">
+        <div className="status-brand">
+          <img
+            src="/assets/hisave_logo.png"
+            alt="HiSAVE"
+            className="status-nav-logo"
+            onClick={() => navigate("/")}
+          />
+        </div>
+
+        <div className={getStatusClass()}>
+          <div className="status-header">
+            <div className="status-icon-badge">
+              {renderStatusIcon()}
+            </div>
+            <h1 className="status-main-title">{status}</h1>
+            <p className="status-sub-message">
+              {statusType === "pending"
+                ? "We're verifying your transaction. Please do not refresh."
+                : statusType === "success"
+                  ? "Your subscription is now active. You can start using premium features immediately."
+                  : "Something went wrong. If amount was deducted, it will be refunded or please contact support."}
+            </p>
+          </div>
+
+          <div className="status-divider">
+            <div className="divider-line"></div>
+            <span className="divider-label">Transaction Summary</span>
+            <div className="divider-line"></div>
+          </div>
+
+          <div className="status-receipt-card">
+            <div className="receipt-row">
+              <div className="receipt-item">
+                <span className="receipt-label">Plan Purchased</span>
+                <span className="receipt-value">{planName}</span>
+              </div>
+              <div className="receipt-item text-right">
+                <span className="receipt-label">Total Amount</span>
+                <span className="receipt-value highlight">₹{planAmount}.00</span>
+              </div>
+            </div>
+
+            <div className="receipt-details-grid">
+              <div className="detail-box">
+                <FaReceipt className="detail-icon" />
+                <div className="detail-info">
+                  <span className="detail-label">Reference ID</span>
+                  <span className="detail-value">{txnReference}</span>
+                </div>
+              </div>
+              <div className="detail-box">
+                <FaRegCalendarAlt className="detail-icon" />
+                <div className="detail-info">
+                  <span className="detail-label">Date & Time</span>
+                  <span className="detail-value">{today}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="status-actions">
+            <button
+              className="primary-action-btn"
+              onClick={() => navigate("/")}
+            >
+              Go to Dashboard
+            </button>
+
+            {statusType !== "success" && (
+              <button
+                className="secondary-action-btn"
+                onClick={() => navigate("/pricing")}
+              >
+                <FaArrowLeft /> Try Again
+              </button>
+            )}
+          </div>
+        </div>
+
+        <footer className="status-footer-minimal">
+          <p>© 2026 HiSAVE. All Rights Reserved. Secure Payments via Decentro.</p>
+        </footer>
+      </div>
+    </div>
+  );
+};
+
+export default PaymentStatus;
+
+
