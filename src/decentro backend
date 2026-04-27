@@ -1,0 +1,1071 @@
+from flask import jsonify, request
+from psycopg2.extras import RealDictCursor, Json
+from datetime import datetime, timedelta
+import json
+import traceback
+import dbutil
+from app import app
+from logger_config import logger
+from payment.decentro_client import create_payment_link, get_transaction_status, DECENTRO_CONSUMER_URN
+
+
+def _decentro_payment_status_terminal(payment_status):
+    """Only sync b2c_user_subscription once Decentro status is clearly not in-flight."""
+    s = str(payment_status or "").strip().lower()
+    if s in ("pending", "processing", "initiated", "created", "", "unknown"):
+        return False
+    return True
+
+
+def _extract_decentro_txn_id(payload):
+    payload = payload or {}
+    data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
+    return (
+        payload.get("decentro_txn_id")
+        or payload.get("decentroTxnId")
+        or payload.get("transaction_id")
+        or payload.get("transactionId")
+        or data.get("decentro_txn_id")
+        or data.get("decentroTxnId")
+        or data.get("transaction_id")
+        or data.get("transactionId")
+    )
+
+
+def _extract_reference_id(payload):
+    payload = payload or {}
+    data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
+    return (
+        payload.get("reference_id")
+        or payload.get("referenceId")
+        or data.get("reference_id")
+        or data.get("referenceId")
+    )
+
+
+def _extract_payment_status(payload):
+    payload = payload or {}
+    data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
+    return (
+        payload.get("transaction_status")
+        or payload.get("transactionStatus")
+        or payload.get("status")
+        or data.get("transaction_status")
+        or data.get("transactionStatus")
+        or "UNKNOWN"
+    )
+
+
+def _decentro_callback_ack(success=True, message=None):
+    if success:
+        body = {"response_code": "CB_S00000"}
+        if message:
+            body["message"] = message
+        return jsonify(body), 200
+    body = {"response_code": "CB_E00009"}
+    if message:
+        body["message"] = message
+    return jsonify(body), 400
+
+
+def _is_callback_authorized():
+    """
+    Optional webhook-auth check.
+    Enable by setting DECENTRO_CALLBACK_AUTH_TOKEN in config.py.
+    Accepts raw token in Authorization or Bearer token formats.
+    """
+    expected = (app.config.get("DECENTRO_CALLBACK_AUTH_TOKEN") or "").strip()
+    if not expected:
+        return True
+
+    auth_header = (request.headers.get("Authorization") or "").strip()
+    x_auth = (request.headers.get("X-Callback-Token") or "").strip()
+    x_decentro_auth = (request.headers.get("X-Decentro-Callback-Token") or "").strip()
+
+    candidates = [auth_header, x_auth, x_decentro_auth]
+    for candidate in candidates:
+        if not candidate:
+            continue
+        if candidate == expected:
+            return True
+        if candidate.lower().startswith("bearer ") and candidate[7:].strip() == expected:
+            return True
+    return False
+
+
+def _json_safe(value):
+    try:
+        return json.loads(json.dumps(value, default=str))
+    except Exception:
+        return value
+
+
+def _decentro_payment_succeeded(payment_status):
+    s = str(payment_status or "").strip().lower()
+    return s in ("paid", "success", "successful", "completed", "captured", "succeeded")
+
+
+def _to_int_rupees(value):
+    try:
+        return int(round(float(value)))
+    except (TypeError, ValueError):
+        return None
+
+
+def _build_wallet_tracking_payload(raw_payload, payment_status, amount, source):
+    payload = raw_payload if isinstance(raw_payload, dict) else {"raw_payload": raw_payload}
+    amount_int = _to_int_rupees(amount)
+    success = _decentro_payment_succeeded(payment_status)
+
+    wallet_tracking = {
+        "split_done": False,
+        "payment_status": payment_status,
+        "source": source,
+    }
+
+    if success and amount_int is not None and amount_int > 0:
+        # Treat amount as GST-inclusive and split into base + GST.
+        base_amount = int((amount_int * 100) // 118)
+        gst_amount = amount_int - base_amount
+        wallet_tracking.update(
+            {
+                "split_done": True,
+                "total_received_in_main_wallet": amount_int,
+                "main_wallet_gross_credit": amount_int,
+                "transfer_to_gst_wallet": gst_amount,
+                "main_wallet_net_after_gst_transfer": base_amount,
+                "plan_amount_excluding_gst": base_amount,
+                "gst_amount": gst_amount,
+                "gst_percent": 18,
+                "split_formula": "base=floor(total*100/118), gst=total-base",
+                "plan_activation_ready": True,
+            }
+        )
+    elif success:
+        wallet_tracking["reason"] = "amount_not_available_for_split"
+        wallet_tracking["plan_activation_ready"] = False
+    else:
+        wallet_tracking["reason"] = "payment_not_successful"
+        wallet_tracking["plan_activation_ready"] = False
+
+    payload["hisave_wallet_tracking"] = wallet_tracking
+    return payload, wallet_tracking
+
+
+def _persist_wallet_tracking(cursor, row, payment_status, source, webhook_payload=None, status_payload=None):
+    if not row:
+        return row, None, None
+
+    row_id = row.get("id")
+    if not row_id:
+        return row, None, None
+
+    db_webhook_payload, tracking = _build_wallet_tracking_payload(
+        webhook_payload if webhook_payload is not None else row.get("webhook_response"),
+        payment_status,
+        row.get("amount"),
+        source,
+    )
+    db_status_payload, _ = _build_wallet_tracking_payload(
+        status_payload if status_payload is not None else row.get("raw_status_response"),
+        payment_status,
+        row.get("amount"),
+        source,
+    )
+
+    cursor.execute(
+        """
+        UPDATE decentro_payments
+        SET webhook_response = %s,
+            raw_status_response = %s,
+            updated_at = NOW()
+        WHERE id = %s
+        RETURNING *;
+        """,
+        (Json(db_webhook_payload), Json(db_status_payload), row_id),
+    )
+    persisted_row = cursor.fetchone()
+    _upsert_wallet_split_row(cursor, persisted_row, tracking, payment_status, source)
+    wallet_update = _apply_virtual_wallet_entries(
+        cursor=cursor,
+        payment_row=persisted_row,
+        tracking=tracking,
+        payment_status=payment_status,
+        source=source,
+    )
+    return persisted_row, tracking, wallet_update
+
+
+def _ensure_wallet_split_report_table(cursor):
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS decentro_payment_gst_split (
+            id BIGSERIAL PRIMARY KEY,
+            decentro_payment_id BIGINT UNIQUE NOT NULL,
+            reference_id VARCHAR(256),
+            uid VARCHAR(256),
+            decentro_txn_id VARCHAR(256),
+            payment_status VARCHAR(64),
+            amount_total INTEGER,
+            base_amount INTEGER,
+            gst_amount INTEGER,
+            gst_percent NUMERIC(5,2),
+            split_done BOOLEAN NOT NULL DEFAULT FALSE,
+            source VARCHAR(128),
+            split_payload JSONB,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        );
+        """
+    )
+
+
+def _upsert_wallet_split_row(cursor, payment_row, tracking, payment_status, source):
+    if not payment_row:
+        return
+
+    _ensure_wallet_split_report_table(cursor)
+
+    payment_id = payment_row.get("id")
+    if not payment_id:
+        return
+
+    amount_total = _to_int_rupees(payment_row.get("amount"))
+    base_amount = _to_int_rupees(tracking.get("plan_amount_excluding_gst"))
+    gst_amount = _to_int_rupees(tracking.get("gst_amount"))
+    gst_percent = tracking.get("gst_percent")
+    split_done = bool(tracking.get("split_done"))
+
+    cursor.execute(
+        """
+        INSERT INTO decentro_payment_gst_split
+        (
+            decentro_payment_id,
+            reference_id,
+            uid,
+            decentro_txn_id,
+            payment_status,
+            amount_total,
+            base_amount,
+            gst_amount,
+            gst_percent,
+            split_done,
+            source,
+            split_payload,
+            created_at,
+            updated_at
+        )
+        VALUES
+        (
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW()
+        )
+        ON CONFLICT (decentro_payment_id)
+        DO UPDATE SET
+            reference_id = EXCLUDED.reference_id,
+            uid = EXCLUDED.uid,
+            decentro_txn_id = EXCLUDED.decentro_txn_id,
+            payment_status = EXCLUDED.payment_status,
+            amount_total = EXCLUDED.amount_total,
+            base_amount = EXCLUDED.base_amount,
+            gst_amount = EXCLUDED.gst_amount,
+            gst_percent = EXCLUDED.gst_percent,
+            split_done = EXCLUDED.split_done,
+            source = EXCLUDED.source,
+            split_payload = EXCLUDED.split_payload,
+            updated_at = NOW();
+        """,
+        (
+            payment_id,
+            payment_row.get("reference_id"),
+            payment_row.get("uid"),
+            payment_row.get("decentro_txn_id"),
+            str(payment_status or "UNKNOWN"),
+            amount_total,
+            base_amount,
+            gst_amount,
+            gst_percent,
+            split_done,
+            source,
+            Json(tracking),
+        ),
+    )
+
+
+def _ensure_virtual_wallet_tables(cursor):
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS decentro_virtual_wallet_balance (
+            id BIGSERIAL PRIMARY KEY,
+            uid VARCHAR(256) NOT NULL,
+            wallet_type VARCHAR(64) NOT NULL,
+            balance INTEGER NOT NULL DEFAULT 0,
+            metadata JSONB,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            UNIQUE (uid, wallet_type)
+        );
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS decentro_virtual_wallet_txn (
+            id BIGSERIAL PRIMARY KEY,
+            decentro_payment_id BIGINT NOT NULL,
+            uid VARCHAR(256) NOT NULL,
+            wallet_type VARCHAR(64) NOT NULL,
+            txn_type VARCHAR(64) NOT NULL,
+            amount INTEGER NOT NULL,
+            reference_id VARCHAR(256),
+            decentro_txn_id VARCHAR(256),
+            payment_status VARCHAR(64),
+            source VARCHAR(128),
+            payload JSONB,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            UNIQUE (decentro_payment_id, txn_type)
+        );
+        """
+    )
+    cursor.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_decentro_wallet_txn_uid_created_at
+            ON decentro_virtual_wallet_txn(uid, created_at DESC);
+        """
+    )
+
+
+def _upsert_wallet_balance(cursor, uid, wallet_type, delta_amount, metadata=None):
+    cursor.execute(
+        """
+        INSERT INTO decentro_virtual_wallet_balance
+            (uid, wallet_type, balance, metadata, created_at, updated_at)
+        VALUES
+            (%s, %s, GREATEST(%s, 0), %s, NOW(), NOW())
+        ON CONFLICT (uid, wallet_type)
+        DO UPDATE SET
+            balance = GREATEST(decentro_virtual_wallet_balance.balance + EXCLUDED.balance, 0),
+            metadata = COALESCE(EXCLUDED.metadata, decentro_virtual_wallet_balance.metadata),
+            updated_at = NOW()
+        RETURNING *;
+        """,
+        (uid, wallet_type, int(delta_amount), Json(metadata) if metadata is not None else None),
+    )
+    return cursor.fetchone()
+
+
+def _insert_wallet_txn(cursor, payment_row, uid, wallet_type, txn_type, amount, payment_status, source, payload):
+    cursor.execute(
+        """
+        INSERT INTO decentro_virtual_wallet_txn
+            (decentro_payment_id, uid, wallet_type, txn_type, amount, reference_id,
+             decentro_txn_id, payment_status, source, payload, created_at)
+        VALUES
+            (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+        ON CONFLICT (decentro_payment_id, txn_type)
+        DO NOTHING
+        RETURNING id;
+        """,
+        (
+            payment_row.get("id"),
+            uid,
+            wallet_type,
+            txn_type,
+            int(amount),
+            payment_row.get("reference_id"),
+            payment_row.get("decentro_txn_id"),
+            str(payment_status or "UNKNOWN"),
+            source,
+            Json(payload),
+        ),
+    )
+    inserted = cursor.fetchone()
+    return bool(inserted)
+
+
+def _apply_virtual_wallet_entries(cursor, payment_row, tracking, payment_status, source):
+    if not payment_row:
+        return None
+
+    uid = payment_row.get("uid")
+    if not uid:
+        return {
+            "applied": False,
+            "reason": "uid_not_available",
+        }
+
+    if not _decentro_payment_succeeded(payment_status):
+        return {
+            "applied": False,
+            "reason": "payment_not_successful",
+        }
+
+    if not tracking or not tracking.get("split_done"):
+        return {
+            "applied": False,
+            "reason": "split_not_available",
+        }
+
+    _ensure_virtual_wallet_tables(cursor)
+
+    gross = _to_int_rupees(tracking.get("main_wallet_gross_credit")) or 0
+    gst_amount = _to_int_rupees(tracking.get("gst_amount")) or 0
+    base_amount = _to_int_rupees(tracking.get("plan_amount_excluding_gst")) or 0
+
+    if gross <= 0:
+        return {
+            "applied": False,
+            "reason": "invalid_gross_amount",
+        }
+
+    credit_payload = {
+        "note": "subscription payment credited",
+        "reference_id": payment_row.get("reference_id"),
+    }
+    if _insert_wallet_txn(
+        cursor,
+        payment_row,
+        uid,
+        "MAIN",
+        "PAYMENT_GROSS_CREDIT",
+        gross,
+        payment_status,
+        source,
+        credit_payload,
+    ):
+        _upsert_wallet_balance(cursor, uid, "MAIN", gross, {"last_source": source})
+
+    if gst_amount > 0 and _insert_wallet_txn(
+        cursor,
+        payment_row,
+        uid,
+        "MAIN",
+        "GST_TRANSFER_DEBIT",
+        -gst_amount,
+        payment_status,
+        source,
+        {
+            "note": "transfer from main wallet to gst wallet",
+            "reference_id": payment_row.get("reference_id"),
+        },
+    ):
+        _upsert_wallet_balance(cursor, uid, "MAIN", -gst_amount, {"last_source": source})
+
+    if gst_amount > 0 and _insert_wallet_txn(
+        cursor,
+        payment_row,
+        uid,
+        "GST",
+        "GST_CREDIT",
+        gst_amount,
+        payment_status,
+        source,
+        {
+            "note": "gst amount credited",
+            "reference_id": payment_row.get("reference_id"),
+        },
+    ):
+        _upsert_wallet_balance(cursor, uid, "GST", gst_amount, {"last_source": source})
+
+    cursor.execute(
+        """
+        SELECT wallet_type, balance
+        FROM decentro_virtual_wallet_balance
+        WHERE uid = %s
+          AND wallet_type IN ('MAIN', 'GST')
+        ORDER BY wallet_type;
+        """,
+        (uid,),
+    )
+    balances = cursor.fetchall() or []
+    by_wallet = {r["wallet_type"]: _to_int_rupees(r["balance"]) or 0 for r in balances}
+
+    return {
+        "applied": True,
+        "uid": uid,
+        "main_wallet_balance": by_wallet.get("MAIN", 0),
+        "gst_wallet_balance": by_wallet.get("GST", 0),
+        "last_payment_base_amount": base_amount,
+        "last_payment_gst_amount": gst_amount,
+    }
+
+
+def _parse_report_date(value, field_name):
+    if not value:
+        return None
+    try:
+        return datetime.strptime(str(value), "%Y-%m-%d").date()
+    except ValueError as e:
+        raise ValueError(f"{field_name} must be in YYYY-MM-DD format") from e
+
+
+@app.route('/createDecentroPaymentLink', methods=['POST'])
+def create_decentro_payment_link():
+    try:
+        logger.info("Cursor in createDecentroPaymentLink endpoint", request.json)
+
+        body = request.json or {}
+
+        reference_id = body.get('reference_id', '').strip()
+        uid = body.get('uid', '').strip() if body.get('uid', '') else None
+        amount_raw = body.get('amount', '')
+        purpose_message = body.get('purpose_message', '').strip()
+        expiry_time = body.get('expiry_time')
+        customer_name = body.get('customer_name', '').strip()
+        customer_mobile = body.get('customer_mobile', '').strip()
+        customer_email = body.get('customer_email', '').strip()
+        requested_redirect_url = f'https://www.gohisave.com/payment-status?reference_id={reference_id}'
+
+        if not reference_id:
+            return jsonify({'error': 'reference_id is required'}), 400
+
+        if amount_raw in (None, ''):
+            return jsonify({'error': 'amount is required'}), 400
+
+        # Amount in INR (rupees); Decentro expects integer between min and 500000
+        try:
+            amount_value = float(str(amount_raw))
+        except (TypeError, ValueError):
+            return jsonify({'error': 'amount must be a valid number'}), 400
+
+        amount_int = int(round(amount_value))
+
+        # Decentro: amount in INR, 1–500000; many gateways enforce minimum (e.g. 200 INR)
+        if amount_int < 1 or amount_int > 500000:
+            return jsonify({'error': 'amount must be between 1 and 500000 INR'}), 400
+        # if amount_int < 200:
+        #     return jsonify({
+        #         'error': 'Minimum amount for this payment gateway is 200 INR. Please use 200 or more.',
+        #         'min_amount_inr': 200
+        #     }), 400
+
+        # expiry_time is optional, default to 30 minutes if missing/invalid
+        if expiry_time is not None:
+            try:
+                expiry_time = int(expiry_time)
+            except (TypeError, ValueError):
+                expiry_time = 3
+        else:
+            expiry_time = 3
+
+        if not purpose_message:
+            purpose_message = f"Payment for {reference_id}"
+
+        payload = {
+            "reference_id": reference_id,
+            "consumer_urn": DECENTRO_CONSUMER_URN,
+            "purpose_message": purpose_message,
+            "expiry_time": expiry_time,
+            "amount": amount_int,
+            "generate_psp_uri": True
+        }
+
+        if requested_redirect_url:
+            payload["redirect_url"] = requested_redirect_url
+
+        # Add these only if your Decentro setup accepts them
+        if customer_name or customer_mobile or customer_email:
+            if customer_name:
+                payload["name"] = customer_name
+            if customer_mobile:
+                payload["mobile_number"] = customer_mobile
+            if customer_email:
+                payload["email"] = customer_email
+
+        decentro_response = create_payment_link(payload)
+
+        decentro_txn_id = (
+            decentro_response.get("decentro_txn_id")
+            or decentro_response.get("data", {}).get("decentro_txn_id")
+        )
+
+        payment_status = (
+            decentro_response.get("transaction_status")
+            or decentro_response.get("data", {}).get("transaction_status")
+            or "PENDING"
+        )
+        logger.info(f"Payment status: {payment_status}")
+        logger.info(f"Decentro response: {decentro_response}")
+
+        payment_link = (
+            decentro_response.get("short_link")
+            or decentro_response.get("common_uri")
+            or decentro_response.get("upi_link")
+            or decentro_response.get("data", {}).get("short_link")
+            or decentro_response.get("data", {}).get("common_uri")
+            or decentro_response.get("data", {}).get("upi_link")
+            or decentro_response.get("data", {}).get("upi_uris", {}).get("common_uri")
+            or decentro_response.get("data", {}).get("upi_uris", {}).get("gpay_uri")
+            or decentro_response.get("data", {}).get("upi_uris", {}).get("phonepe_uri")
+            or decentro_response.get("data", {}).get("upi_uris", {}).get("paytm_uri")
+            or decentro_response.get("data", {}).get("upi_uris", {}).get("cred_uri")
+        )
+
+        connection = dbutil.get_db_connection()
+        cursor = connection.cursor(cursor_factory=RealDictCursor)
+
+        cursor.execute("""
+            INSERT INTO decentro_payments
+            (
+                reference_id,
+                uid,
+                decentro_txn_id,
+                amount,
+                customer_name,
+                customer_mobile,
+                customer_email,
+                payment_link,
+                payment_status,
+                raw_create_response,
+                updated_at
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+            RETURNING *;
+        """, (
+            reference_id,
+            uid,
+            decentro_txn_id,
+            amount_int,
+            customer_name,
+            customer_mobile,
+            customer_email,
+            payment_link,
+            payment_status,
+            Json(decentro_response)
+        ))
+
+        inserted_row = cursor.fetchone()
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        return jsonify({
+            'message': 'Payment link created successfully',
+            'reference_id': reference_id,
+            'uid': uid,
+            'decentro_txn_id': decentro_txn_id,
+            'payment_status': payment_status,
+            'redirect_url': payment_link,
+            'requested_redirect_url': requested_redirect_url or None,
+            'decentro_response': decentro_response,
+            'db_data': inserted_row
+        }), 200
+
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/decentroWebhook/terminalStatus', methods=['POST'])
+def decentro_terminal_status_webhook():
+    try:
+        logger.info("Cursor in decentroWebhook/terminalStatus endpoint")
+        if not _is_callback_authorized():
+            logger.error("Unauthorized Decentro callback request")
+            return _decentro_callback_ack(False, "unauthorized callback")
+
+        payload = request.json or {}
+        logger.info(f"Webhook payload: {payload}")
+
+        decentro_txn_id = _extract_decentro_txn_id(payload)
+        reference_id = _extract_reference_id(payload)
+        payment_status = _extract_payment_status(payload)
+
+        if not decentro_txn_id and not reference_id:
+            logger.error(f"Callback missing both transaction and reference ids: {payload}")
+            return _decentro_callback_ack(False, "missing transaction/reference id")
+
+        connection = dbutil.get_db_connection()
+        cursor = connection.cursor(cursor_factory=RealDictCursor)
+
+        updated_row = None
+        status_response = None
+
+        if decentro_txn_id:
+            # Optional verification before final DB update
+            try:
+                status_response = get_transaction_status(decentro_txn_id)
+                payment_status = (
+                    status_response.get("transaction_status")
+                    or status_response.get("data", {}).get("transaction_status")
+                    or payment_status
+                )
+            except Exception as verify_error:
+                logger.error(f"Status verification failed: {str(verify_error)}")
+                status_response = None
+
+            cursor.execute("""
+                UPDATE decentro_payments
+                SET payment_status = %s,
+                    webhook_response = %s,
+                    raw_status_response = COALESCE(%s, raw_status_response),
+                    updated_at = NOW()
+                WHERE decentro_txn_id = %s
+                RETURNING *;
+            """, (
+                payment_status,
+                Json(payload),
+                Json(status_response) if status_response else None,
+                decentro_txn_id
+            ))
+            updated_row = cursor.fetchone()
+
+            # Fallback: callback may not carry the same txn id we stored.
+            if updated_row is None and reference_id:
+                cursor.execute("""
+                    UPDATE decentro_payments
+                    SET payment_status = %s,
+                        webhook_response = %s,
+                        raw_status_response = COALESCE(%s, raw_status_response),
+                        updated_at = NOW()
+                    WHERE LOWER(reference_id) = LOWER(%s)
+                    RETURNING *;
+                """, (
+                    payment_status,
+                    Json(payload),
+                    Json(status_response) if status_response else None,
+                    reference_id
+                ))
+                updated_row = cursor.fetchone()
+
+        elif reference_id:
+            cursor.execute("""
+                UPDATE decentro_payments
+                SET payment_status = %s,
+                    webhook_response = %s,
+                    updated_at = NOW()
+                WHERE LOWER(reference_id) = LOWER(%s)
+                RETURNING *;
+            """, (
+                payment_status,
+                Json(payload),
+                reference_id
+            ))
+            updated_row = cursor.fetchone()
+
+        updated_row, wallet_tracking, virtual_wallet_update = _persist_wallet_tracking(
+            cursor=cursor,
+            row=updated_row,
+            payment_status=payment_status,
+            source="decentroWebhook/terminalStatus",
+            webhook_payload=payload,
+            status_payload=status_response,
+        )
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        subscription_sync = None
+        try:
+            ref = reference_id
+            if not ref and updated_row:
+                ref = updated_row.get("reference_id")
+            dtid = decentro_txn_id or _extract_decentro_txn_id(payload)
+            if ref and updated_row is not None and _decentro_payment_status_terminal(payment_status):
+                from b2c_user_subscription.rt_user_subscription import (
+                    sync_b2c_subscription_after_decentro,
+                )
+
+                subscription_sync = sync_b2c_subscription_after_decentro(
+                    ref, dtid, payment_status, payload
+                )
+        except Exception as sync_err:
+            logger.error(f"Decentro webhook subscription sync: {sync_err}")
+
+        if updated_row is None:
+            logger.error(
+                "Decentro callback not linked to payment row. "
+                f"reference_id={reference_id} decentro_txn_id={decentro_txn_id}"
+            )
+            return _decentro_callback_ack(True, "callback received (no matching payment row)")
+
+        return _decentro_callback_ack(True, "callback processed")
+
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"error: {str(e)}")
+        return _decentro_callback_ack(False, str(e))
+
+
+@app.route('/getDecentroTxnStatus', methods=['GET'])
+def get_decentro_txn_status():
+    try:
+        logger.info("Cursor in getDecentroTxnStatus endpoint")
+
+        decentro_txn_id = request.args.get('decentro_txn_id', '').strip()
+        reference_id = request.args.get('reference_id', '').strip()
+
+        connection = dbutil.get_db_connection()
+        cursor = connection.cursor(cursor_factory=RealDictCursor)
+
+        if not decentro_txn_id:
+            if not reference_id:
+                return jsonify({'error': 'Either decentro_txn_id or reference_id is required'}), 400
+
+            cursor.execute("""
+                SELECT decentro_txn_id
+                FROM decentro_payments
+                WHERE LOWER(reference_id) = LOWER(%s)
+                ORDER BY id DESC
+                LIMIT 1
+            """, (reference_id,))
+            row = cursor.fetchone()
+
+            if not row or not row.get('decentro_txn_id'):
+                cursor.close()
+                connection.close()
+                return jsonify({'error': 'No transaction found for given reference_id'}), 404
+
+            decentro_txn_id = row['decentro_txn_id']
+
+        try:
+            status_response = get_transaction_status(decentro_txn_id)
+        except Exception as status_err:
+            logger.error(f"getDecentroTxnStatus status fetch failed: {status_err}")
+
+            cursor.execute("""
+                SELECT *
+                FROM decentro_payments
+                WHERE decentro_txn_id = %s
+                   OR (%s <> '' AND LOWER(reference_id) = LOWER(%s))
+                ORDER BY id DESC
+                LIMIT 1
+            """, (decentro_txn_id, reference_id, reference_id))
+            fallback_row = cursor.fetchone()
+            cursor.close()
+            connection.close()
+
+            if fallback_row:
+                return jsonify({
+                    'decentro_txn_id': fallback_row.get('decentro_txn_id') or decentro_txn_id,
+                    'payment_status': fallback_row.get('payment_status') or 'PENDING',
+                    'decentro_response': None,
+                    'db_data': _json_safe(fallback_row),
+                    'subscription_sync': None,
+                    'wallet_tracking': None,
+                    'virtual_wallet_update': None,
+                    'warning': f'status API failed, returned DB fallback: {status_err}',
+                }), 200
+
+            return jsonify({
+                'error': f'Invalid or unknown decentro_txn_id: {decentro_txn_id}',
+                'details': str(status_err),
+            }), 400
+
+        payment_status = (
+            status_response.get("transaction_status")
+            or status_response.get("data", {}).get("transaction_status")
+            or "PENDING"
+        )
+
+        cursor.execute("""
+            UPDATE decentro_payments
+            SET payment_status = %s,
+                raw_status_response = %s,
+                updated_at = NOW()
+            WHERE decentro_txn_id = %s
+            RETURNING *;
+        """, (
+            payment_status,
+            Json(status_response),
+            decentro_txn_id
+        ))
+
+        updated_row = cursor.fetchone()
+        updated_row, wallet_tracking, virtual_wallet_update = _persist_wallet_tracking(
+            cursor=cursor,
+            row=updated_row,
+            payment_status=payment_status,
+            source="getDecentroTxnStatus",
+            status_payload=status_response,
+        )
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        subscription_sync = None
+        try:
+            if (
+                updated_row
+                and updated_row.get("reference_id")
+                and _decentro_payment_status_terminal(payment_status)
+            ):
+                from b2c_user_subscription.rt_user_subscription import (
+                    sync_b2c_subscription_after_decentro,
+                )
+
+                subscription_sync = sync_b2c_subscription_after_decentro(
+                    updated_row.get("reference_id"),
+                    decentro_txn_id,
+                    payment_status,
+                    status_response,
+                )
+        except Exception as sync_err:
+            logger.error(f"getDecentroTxnStatus subscription sync: {sync_err}")
+
+        return jsonify({
+            'decentro_txn_id': decentro_txn_id,
+            'payment_status': payment_status,
+            'decentro_response': _json_safe(status_response),
+            'db_data': _json_safe(updated_row),
+            'subscription_sync': _json_safe(subscription_sync),
+            'wallet_tracking': _json_safe(wallet_tracking),
+            'virtual_wallet_update': _json_safe(virtual_wallet_update),
+        }), 200
+
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/getDecentroGstReport', methods=['GET', 'POST'])
+def get_decentro_gst_report():
+    try:
+        payload = request.json if request.method == 'POST' else request.args
+        payload = payload or {}
+
+        from_date_raw = (payload.get("from_date") or "").strip()
+        to_date_raw = (payload.get("to_date") or "").strip()
+        uid = (payload.get("uid") or "").strip() or None
+        group_by = (payload.get("group_by") or "day").strip().lower()
+        include_failed = str(payload.get("include_failed", "false")).strip().lower() in ("1", "true", "yes")
+
+        if group_by not in ("day", "uid", "payment"):
+            return jsonify({"error": "group_by must be one of: day, uid, payment"}), 400
+
+        from_date = _parse_report_date(from_date_raw, "from_date")
+        to_date = _parse_report_date(to_date_raw, "to_date")
+
+        today = datetime.utcnow().date()
+        if not to_date:
+            to_date = today
+        if not from_date:
+            from_date = to_date - timedelta(days=29)
+
+        if to_date < from_date:
+            return jsonify({"error": "to_date must be on or after from_date"}), 400
+
+        statuses = (
+            "paid",
+            "success",
+            "successful",
+            "completed",
+            "captured",
+            "succeeded",
+        )
+
+        where_parts = [
+            "updated_at >= %s::date",
+            "updated_at < (%s::date + interval '1 day')",
+        ]
+        params = [from_date.isoformat(), to_date.isoformat()]
+
+        if uid:
+            where_parts.append("uid = %s")
+            params.append(uid)
+
+        if not include_failed:
+            where_parts.append("lower(payment_status) = ANY(%s)")
+            params.append(list(statuses))
+
+        where_sql = " AND ".join(where_parts)
+
+        connection = dbutil.get_db_connection()
+        cursor = connection.cursor(cursor_factory=RealDictCursor)
+
+        cursor.execute(
+            f"""
+            SELECT
+                COUNT(*) AS txn_count,
+                COALESCE(SUM(amount_total), 0) AS gross_amount,
+                COALESCE(SUM(base_amount), 0) AS base_amount,
+                COALESCE(SUM(gst_amount), 0) AS gst_amount
+            FROM decentro_payment_gst_split
+            WHERE {where_sql}
+            """,
+            tuple(params),
+        )
+        summary = cursor.fetchone() or {}
+
+        if group_by == "day":
+            cursor.execute(
+                f"""
+                SELECT
+                    DATE(updated_at) AS bucket,
+                    COUNT(*) AS txn_count,
+                    COALESCE(SUM(amount_total), 0) AS gross_amount,
+                    COALESCE(SUM(base_amount), 0) AS base_amount,
+                    COALESCE(SUM(gst_amount), 0) AS gst_amount
+                FROM decentro_payment_gst_split
+                WHERE {where_sql}
+                GROUP BY DATE(updated_at)
+                ORDER BY DATE(updated_at) DESC
+                """,
+                tuple(params),
+            )
+            rows = cursor.fetchall() or []
+        elif group_by == "uid":
+            cursor.execute(
+                f"""
+                SELECT
+                    COALESCE(uid, 'unknown') AS bucket,
+                    COUNT(*) AS txn_count,
+                    COALESCE(SUM(amount_total), 0) AS gross_amount,
+                    COALESCE(SUM(base_amount), 0) AS base_amount,
+                    COALESCE(SUM(gst_amount), 0) AS gst_amount
+                FROM decentro_payment_gst_split
+                WHERE {where_sql}
+                GROUP BY COALESCE(uid, 'unknown')
+                ORDER BY COALESCE(SUM(gst_amount), 0) DESC
+                """,
+                tuple(params),
+            )
+            rows = cursor.fetchall() or []
+        else:
+            cursor.execute(
+                f"""
+                SELECT
+                    reference_id,
+                    uid,
+                    decentro_txn_id,
+                    payment_status,
+                    amount_total,
+                    base_amount,
+                    gst_amount,
+                    gst_percent,
+                    split_done,
+                    source,
+                    updated_at
+                FROM decentro_payment_gst_split
+                WHERE {where_sql}
+                ORDER BY updated_at DESC
+                LIMIT 1000
+                """,
+                tuple(params),
+            )
+            rows = cursor.fetchall() or []
+
+        cursor.close()
+        connection.close()
+
+        return jsonify(
+            {
+                "filters": {
+                    "from_date": from_date.isoformat(),
+                    "to_date": to_date.isoformat(),
+                    "uid": uid,
+                    "group_by": group_by,
+                    "include_failed": include_failed,
+                },
+                "summary": summary,
+                "rows": rows,
+            }
+        ), 200
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"getDecentroGstReport error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
